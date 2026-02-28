@@ -1,0 +1,125 @@
+/* login.css - Styles pour la page de connexion */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-container {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+}
+
+.login-box {
+    background: transparent;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 40px;
+}
+
+.login-box h1 {
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.login-box h2 {
+    font-size: 18px;
+    color: black;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: normal;
+}
+
+/* Formulaire */
+.login-form .form-group {
+    margin-bottom: 20px;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: black;
+    font-weight: 500;
+}
+
+/* Vos modifications ici */
+.login-form input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e1e1e1;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    background: transparent;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Vos modifications ici */
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-login:hover {
+    background: #5a67d8;
+}
+
+/* Alertes */
+.alert {
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.alert-error {
+    background: #fee;
+    color: #c33;
+    border: 1px solid #fcc;
+}
+
+/* Infos démo - Vos modifications (couleur black) */
+.login-info {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    font-size: 14px;
+    color: black;
+}
+
+.login-info ul {
+    margin-top: 10px;
+    list-style: none;
+}
+
+.login-info li {
+    margin-bottom: 5px;
+    font-family: monospace;
+    background: #f5f5f5;
+    padding: 5px;
+    border-radius: 3px;
+}
