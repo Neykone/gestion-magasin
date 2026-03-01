@@ -19,7 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
         header('Location: admin.php');
         exit();
-    } else {
+    }
+    elseif ($email === 'vendeur@magasin.com' && $password === 'vendeur123') {
+        $_SESSION['user'] = [
+            'id' => 2,
+            'name' => 'Vendeur',
+            'email' => $email,
+            'role' => 'vendeur'
+        ];
+        header('Location: caisse.php');  // ← C'est correct
+        exit();
+    }
+    else {
         $error = 'Email ou mot de passe incorrect';
     }
 }

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caisse - Gestion Magasin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="caisse.css">
+</head>
+<body>
+<div class="caisse-container">
+    <!-- Header -->
+    <header class="caisse-header">
+        <div class="header-left">
+            <h1><i class="fas fa-cash-register"></i> Caisse</h1>
+            <span class="badge-vendeur"><i class="fas fa-user"></i> <?= htmlspecialchars($userName) ?></span>
+        </div>
+        <div class="header-right">
+            <a href="historique.php" class="btn-historique">
+                <i class="fas fa-history"></i> Mon historique
+            </a>
+        </div>
+        <div class="header-right">
+            <a href="logout.php" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <div class="caisse-content">
+        <!-- Colonne gauche : Recherche et produits -->
+        <div class="colonne-gauche">
+            <div class="recherche-section">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchProduit" placeholder="Rechercher un produit par nom ou code-barres...">
+                </div>
+                <div class="filtres-rapides">
+                    <button class="filtre-btn actif">Tous</button>
+                    <button class="filtre-btn">Électronique</button>
+                    <button class="filtre-btn">Informatique</button>
+                    <button class="filtre-btn">Accessoires</button>
+                </div>
+            </div>
+
+            <div class="produits-grid" id="produitsGrid">
+                <?php foreach ($produits as $produit): ?>
+                <div class="produit-card <?= $produit['stock'] <= 3 ? 'stock-faible' : '' ?>"
+                     data-id="<?= $produit['id'] ?>"
+                     data-nom="<?= htmlspecialchars($produit['nom']) ?>"
+                     data-prix="<?= $produit['prix'] ?>"
+                     data-stock="<?= $produit['stock'] ?>">
+                    <div class="produit-nom"><?= htmlspecialchars($produit['nom']) ?></div>
+                    <div class="produit-prix"><?= number_format($produit['prix'], 2) ?> DH</div>
+                    <div class="produit-stock">
+                        Stock: <span class="<?= $produit['stock'] <= 3 ? 'text-danger' : '' ?>"><?= $produit['stock'] ?></span>
+                    </div>
+                    <?php $prod=$produit['id'];
+                    if ($produit['stock'] > 0): ?>
+                    <button class="btn-add-panier" onclick="ajouterAuPanier(<?php echo $produit['id']; ?>)">
+                        <i class="fas fa-cart-plus"></i> Ajouter
+                    </button>
+                    <?php else: ?>
+                    <button class="btn-add-panier" disabled style="background: #ccc;">Rupture</button>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <!-- Colonne droite : Panier -->
+        <div class="colonne-droite">
+            <div class="panier-header">
+                <h2><i class="fas fa-shopping-cart"></i> Panier</h2>
+                <button class="btn-vider" onclick="viderPanier()"><i class="fas fa-trash"></i> Vider</button>
+            </div>
+
+            <div class="panier-content" id="panierContent">
+                <table class="panier-table">
+                    <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th>Prix</th>
+                        <th>Qté</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="panierBody">
+                    <!-- Les articles seront ajoutés ici par JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panier-total">
+                <div class="total-ligne">
+                    <span>Sous-total:</span>
+                    <span id="sousTotal">0.00 DH</span>
+                </div>
+                <div class="total-ligne">
+                    <span>TVA (20%):</span>
+                    <span id="tva">0.00 DH</span>
+                </div>
+                <div class="total-final">
+                    <span>TOTAL TTC:</span>
+                    <span id="totalFinal">0.00 DH</span>
+                </div>
+            </div>
+
+            <div class="panier-actions">
+                <button class="btn-encaisser" onclick="encaisser()">
+                    <i class="fas fa-check-circle"></i> Encaisser
+                </button>
+                <button class="btn-annuler" onclick="annulerVente()">
+                    <i class="fas fa-times-circle"></i> Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Variables globales
+    let panier = [];
+
+    // Fonction pour ajouter au panier
+    function ajouterAuPanier(id) {
+        let produitCard = document.querySelector(`.produit-card[data-id="${id}"]`);
+        let nom = produitCard.dataset.nom;
+        let prix = parseFloat(produitCard.dataset.prix);
+        let stock = parseInt(produitCard.dataset.stock);
+
+        // Vérifier le stock
+        let articleExistant = panier.find(item => item.id === id);
+        let quantiteDansPanier = articleExistant ? articleExistant.quantite : 0;
+
+        if (quantiteDansPanier >= stock) {
+            alert('Stock insuffisant!');
+            return;
+        }
+
+        if (articleExistant) {
+            articleExistant.quantite++;
+        } else {
+            panier.push({
+                id: id,
+                nom: nom,
+                prix: prix,
+                quantite: 1,
+                stock: stock
+            });
+        }
+
+        mettreAJourPanier();
+    }
+
+    // Fonction pour mettre à jour l'affichage du panier
+    function mettreAJourPanier() {
+        let tbody = document.getElementById('panierBody');
+        tbody.innerHTML = '';
+
+        let sousTotal = 0;
+
+        panier.forEach((item, index) => {
+            let totalLigne = item.prix * item.quantite;
+            sousTotal += totalLigne;
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.nom}</td>
+                <td>${item.prix.toFixed(2)} DH</td>
+                <td>
+                    <input type="number" min="1" max="${item.stock}" value="${item.quantite}"
+                           onchange="changerQuantite(${index}, this.value)" style="width: 50px;">
+                </td>
+                <td>${totalLigne.toFixed(2)} DH</td>
+                <td><button onclick="retirerDuPanier(${index})" style="color: red; border: none; background: none;"><i class="fas fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        let tva = sousTotal * 0.20;
+        let total = sousTotal + tva;
+
+        document.getElementById('sousTotal').textContent = sousTotal.toFixed(2) + ' DH';
+        document.getElementById('tva').textContent = tva.toFixed(2) + ' DH';
+        document.getElementById('totalFinal').textContent = total.toFixed(2) + ' DH';
+    }
+
+    // Fonction pour changer la quantité
+    function changerQuantite(index, nouvelleQuantite) {
+        nouvelleQuantite = parseInt(nouvelleQuantite);
+        if (nouvelleQuantite < 1) nouvelleQuantite = 1;
+        if (nouvelleQuantite > panier[index].stock) {
+            alert('Stock insuffisant!');
+            nouvelleQuantite = panier[index].stock;
+        }
+        panier[index].quantite = nouvelleQuantite;
+        mettreAJourPanier();
+    }
+
+    // Fonction pour retirer du panier
+    function retirerDuPanier(index) {
+        panier.splice(index, 1);
+        mettreAJourPanier();
+    }
+
+    // Fonction pour vider le panier
+    function viderPanier() {
+        if (confirm('Vider le panier ?')) {
+            panier = [];
+            mettreAJourPanier();
+        }
+    }
+
+    // Fonction pour annuler la vente
+    function annulerVente() {
+        if (panier.length > 0) {
+            if (confirm('Annuler la vente en cours ?')) {
+                panier = [];
+                mettreAJourPanier();
+            }
+        }
+    }
+
+    // Fonction pour encaisser
+    function encaisser() {
+        if (panier.length === 0) {
+            alert('Panier vide!');
+            return;
+        }
+
+        let total = parseFloat(document.getElementById('totalFinal').textContent);
+        let message = `Total à payer: ${total.toFixed(2)} DH\n\nChoisir le mode de paiement:`;
+        let modePaiement = prompt(message + '\n1: Espèces\n2: Carte\n3: Virement');
+
+        if (modePaiement === '1' || modePaiement === '2' || modePaiement === '3') {
+            let modes = ['', 'Espèces', 'Carte', 'Virement'];
+            alert(`Vente enregistrée! Paiement par ${modes[modePaiement]}`);
+            panier = [];
+            mettreAJourPanier();
+        }
+    }
+
+    // Recherche de produits
+    document.getElementById('searchProduit').addEventListener('keyup', function() {
+        let searchValue = this.value.toLowerCase();
+        let produits = document.querySelectorAll('.produit-card');
+
+        produits.forEach(produit => {
+            let nom = produit.dataset.nom.toLowerCase();
+            if (nom.includes(searchValue)) {
+                produit.style.display = 'block';
+            } else {
+                produit.style.display = 'none';
+            }
+        });
+    });
+
+    // Filtres par catégorie
+    document.querySelectorAll('.filtre-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filtre-btn').forEach(b => b.classList.remove('actif'));
+            this.classList.add('actif');
+            // Ici tu peux ajouter le filtre par catégorie
+        });
+    });
+</script>
+</body>
+</html>
