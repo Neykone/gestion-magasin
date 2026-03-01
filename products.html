@@ -172,7 +172,8 @@
                                 <a href="?delete=<?= $product['id'] ?>"
                                    class="btn-delete"
                                    title="Supprimer"
-                                   onclick="return confirm('Supprimer <?= htmlspecialchars(isset($product[\'nom\']) ? $product[\'nom\'] : \'\') ?>');"
+                                onclick="return confirm('Supprimer <?= $productName ?>');"/>
+
 
                                     <i class="fas fa-trash"></i>
                                 </a>
