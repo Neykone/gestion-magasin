@@ -35,13 +35,13 @@
                 </a>
             </li>
             <li>
-                <a href="#">
+                <a href="categories.php">
                     <i class="fas fa-tags"></i>
                     <span>Catégories</span>
                 </a>
             </li>
             <li>
-                <a href="#">
+                <a href="categories.php">
                     <i class="fas fa-truck"></i>
                     <span>Fournisseurs</span>
                 </a>
@@ -165,6 +165,9 @@
                         </td>
                         <td><?= htmlspecialchars($product['fournisseur']) ?></td>
                         <td>
+                            <?php
+                            $productName=$product['nom'];
+                            ?>
                             <div class="actions">
                                 <a href="#" class="btn-edit" title="Modifier">
                                     <i class="fas fa-edit"></i>
