@@ -1,7 +1,11 @@
 <?php
-// login.php - Version simplifiée avec données simulées
+// login.php - Version avec base de données
 session_start();
 
+// Inclure le modèle UserModel
+require_once 'models/UserModel.php';
+
+// Si déjà connecté, rediriger selon le rôle
 if (isset($_SESSION['user'])) {
     if ($_SESSION['user']['role'] === 'admin') {
         header('Location: admin.php');
@@ -15,39 +19,32 @@ if (isset($_SESSION['user'])) {
 
 $error = null;
 
+// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = isset($_POST['email']) ? $_POST['email'] : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
 
-    // Simulation de vérification
-    if ($email === 'admin@magasin.com' && $password === 'admin123') {
-        $_SESSION['user'] = [
-            'id' => 1,
-            'name' => 'Admin',
-            'email' => $email,
-            'role' => 'admin'
-        ];
-        header('Location: admin.php');
-        exit();
+    // Utiliser le modèle pour vérifier les identifiants
+    $userModel = new UserModel();
+    $user = $userModel->verifyPassword($email, $password);
 
-    } elseif ($email === 'vendeur@magasin.com' && $password === 'vendeur123') {
+    if ($user) {
+        // Connexion réussie
         $_SESSION['user'] = [
-            'id' => 2,
-            'name' => 'Vendeur',
-            'email' => $email,
-            'role' => 'vendeur'
+            'id' => $user['id'],
+            'name' => $user['nom'],
+            'email' => $user['email'],
+            'role' => $user['role']
         ];
-        header('Location: caisse.php');
-        exit();
 
-    } elseif ($email === 'fournisseur@magasin.com' && $password === 'fournisseur123') {
-        $_SESSION['user'] = [
-            'id' => 3,
-            'name' => 'Pierre Durand',
-            'email' => $email,
-            'role' => 'fournisseur'
-        ];
-        header('Location: fournisseur_dashboard.php');  // ← Redirection fournisseur
+        // Redirection selon le rôle
+        if ($user['role'] === 'admin') {
+            header('Location: admin.php');
+        } elseif ($user['role'] === 'vendeur') {
+            header('Location: caisse.php');
+        } elseif ($user['role'] === 'fournisseur') {
+            header('Location: fournisseur_dashboard.php');
+        }
         exit();
 
     } else {
@@ -55,5 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Inclure la vue (le HTML ne change pas)
 include 'login.html';
 ?>
