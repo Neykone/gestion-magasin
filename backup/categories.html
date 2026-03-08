@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Catégories - Gestion Magasin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="Admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>Gestion Magasin</h2>
+            <p>Administrateur</p>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li>
+                <a href="admin.php">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="users.php">
+                    <i class="fas fa-users"></i>
+                    <span>Utilisateurs</span>
+                </a>
+            </li>
+            <li>
+                <a href="products.php">
+                    <i class="fas fa-box"></i>
+                    <span>Produits</span>
+                </a>
+            </li>
+            <li class="active">
+                <a href="categories.php">
+                    <i class="fas fa-tags"></i>
+                    <span>Catégories</span>
+                </a>
+            </li>
+            <li>
+                <a href="fournisseurs.php">
+                    <i class="fas fa-truck"></i>
+                    <span>Fournisseurs</span>
+                </a>
+            </li>
+            <li>
+                <a href="ventes.php">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Ventes</span>
+                </a>
+            </li>
+            <li class="logout">
+                <a href="logout.php">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header class="content-header">
+            <h1>Gestion des Catégories</h1>
+            <div class="user-info">
+                <span>Bienvenue, <?= htmlspecialchars($userName) ?></span>
+                <img src="https://ui-avatars.com/api/?name=<?= urlencode($userName) ?>&background=667eea&color=fff" alt="Avatar">
+            </div>
+        </header>
+
+        <div class="content">
+            <?php if (!empty($message)): ?>
+            <div class="alert alert-success" style="margin-bottom: 20px; padding: 15px; border-radius: 5px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+                <?= htmlspecialchars($message) ?>
+            </div>
+            <?php endif; ?>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 20px; color: #333;">Liste des catégories</h2>
+                <a href="#" class="btn-add" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px;">
+                    <i class="fas fa-plus"></i>
+                    Nouvelle Catégorie
+                </a>
+            </div>
+
+            <div class="table-container">
+                <table id="categoriesTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Description</th>
+                        <th>Nombre de produits</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($categories as $categorie): ?>
+                    <tr>
+                        <td>#<?= $categorie['id'] ?></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 30px; height: 30px; background: #667eea; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: white;">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <strong><?= htmlspecialchars($categorie['nom']) ?></strong>
+                            </div>
+                        </td>
+                        <td><?= htmlspecialchars($categorie['description'] ?? '') ?></td>
+                        <td>
+                            <span class="badge badge-info"><?= $categorie['nb_produits'] ?> produits</span>
+                        </td>
+                        <td>
+                                <span class="badge <?= $categorie['statut'] === 'actif' ? 'badge-success' : 'badge-warning' ?>">
+                                    <?= ucfirst($categorie['statut']) ?>
+                                </span>
+                        </td>
+                        <td>
+                            <?php
+                            $catName=$categorie['nom'];
+                            ?>
+                            <div class="actions">
+                                <a href="#" class="btn-edit" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="?delete=<?= $categorie['id'] ?>"
+                                   class="btn-delete"
+                                   title="Supprimer"
+                                   onclick="return confirm('Supprimer <?= $catName ?>');"/>
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px;">
+                <?php
+                $totalCategories = count($categories);
+                $categoriesActives = 0;
+                $totalProduitsCategories = 0;
+
+                foreach ($categories as $categorie) {
+                    if ($categorie['statut'] === 'actif') {
+                        $categoriesActives++;
+                    }
+                    $totalProduitsCategories += $categorie['nb_produits'];
+                }
+                ?>
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Total Catégories</div>
+                    <div style="font-size: 32px; font-weight: bold; color: #667eea;"><?= $totalCategories ?></div>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Catégories Actives</div>
+                    <div style="font-size: 32px; font-weight: bold; color: #28a745;"><?= $categoriesActives ?></div>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Produits dans catégories</div>
+                    <div style="font-size: 32px; font-weight: bold; color: #17a2b8;"><?= $totalProduitsCategories ?></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Recherche simple
+    document.getElementById('categoriesTable')?.addEventListener('keyup', function(e) {
+        if (e.target.id === 'searchProduct') {
+            let searchValue = e.target.value.toLowerCase();
+            let rows = document.querySelectorAll('#categoriesTable tbody tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                let row = rows[i];
+                let text = row.textContent.toLowerCase();
+                if (text.indexOf(searchValue) > -1) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

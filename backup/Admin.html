@@ -1,0 +1,90 @@
+<!-- admin.html - Structure HTML du dashboard admin -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Gestion Magasin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="Admin.css">
+</head>
+<body>
+<div class="admin-container">
+    <!-- Menu latéral -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>Gestion Magasin</h2>
+            <p>Administrateur</p>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="active">
+                <a href="admin.php">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="users.php">
+                    <i class="fas fa-users"></i>
+                    <span>Utilisateurs</span>
+                </a>
+            </li>
+            <li>
+                <a href="products.php">
+                    <i class="fas fa-box"></i>
+                    <span>Produits</span>
+                </a>
+            </li>
+            <li>
+                <a href="categories.php">
+                    <i class="fas fa-tags"></i>
+                    <span>Catégories</span>
+                </a>
+            </li>
+            <li>
+                <a href="fournisseurs.php">
+                    <i class="fas fa-truck"></i>
+                    <span>Fournisseurs</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Ventes</span>
+                </a>
+            </li>
+            <li class="logout">
+                <a href="logout.php">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="content-header">
+            <h1>Dashboard</h1>
+            <div class="user-info">
+                <span>Bienvenue, <span id="userName">Admin</span></span>
+                <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" alt="Avatar">
+            </div>
+        </header>
+
+        <!-- Contenu dynamique -->
+        <div class="content" id="dashboardContent">
+            <!-- Le contenu sera chargé dynamiquement par PHP -->
+        </div>
+    </main>
+</div>
+
+<!-- Script pour le chargement dynamique (optionnel) -->
+<script>
+    // Ce script pourra être utilisé plus tard pour des mises à jour AJAX
+    console.log('Dashboard admin chargé');
+</script>
+</body>
+</html>

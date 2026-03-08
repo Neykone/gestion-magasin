@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Fournisseur - Gestion Magasin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="fournisseur.css">
+</head>
+<body>
+<div class="fournisseur-container">
+    <!-- Header -->
+    <header class="fournisseur-header">
+        <div class="header-left">
+            <h1><i class="fas fa-truck"></i> Espace Fournisseur</h1>
+            <span class="badge-fournisseur">
+                <i class="fas fa-user"></i> <?= htmlspecialchars($userName) ?>
+            </span>
+        </div>
+        <div class="header-right">
+            <a href="logout.php" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </a>
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <div class="fournisseur-content">
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>Mes Produits</h3>
+                    <span class="stat-number"><?= $totalProduits ?></span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fas fa-cubes"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>Stock Total</h3>
+                    <span class="stat-number"><?= $stockTotal ?></span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>Produits en Alerte</h3>
+                    <span class="stat-number"><?= $produitsAlerte ?></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message d'accueil -->
+        <div class="welcome-message">
+            <i class="fas fa-info-circle"></i>
+            <p>Bienvenue dans votre espace fournisseur. Vous pouvez consulter l'état des stocks des produits que vous fournissez.</p>
+        </div>
+
+        <!-- Filtres et recherche -->
+        <div class="filtres-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchProduit" placeholder="Rechercher un produit...">
+            </div>
+            <div class="filter-group">
+                <select id="filterCategorie" class="filter-select">
+                    <option value="">Toutes catégories</option>
+                    <option value="Électronique">Électronique</option>
+                    <option value="Informatique">Informatique</option>
+                    <option value="Audio">Audio</option>
+                </select>
+                <select id="filterStock" class="filter-select">
+                    <option value="">Tous les stocks</option>
+                    <option value="alerte">Stock bas (alerte)</option>
+                    <option value="normal">Stock normal</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tableau des produits -->
+        <div class="table-container">
+            <h2>Mes produits en stock</h2>
+            <table id="produitsTable">
+                <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Catégorie</th>
+                    <th>Description</th>
+                    <th>Prix vente</th>
+                    <th>Stock actuel</th>
+                    <th>Seuil alerte</th>
+                    <th>Statut</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($produitsFournis as $produit):
+                        $stockClass = '';
+                        $statutTexte = 'Normal';
+                        $statutClass = 'badge-success';
+
+                        if ($produit['stock'] == 0) {
+                            $stockClass = 'out-of-stock';
+                            $statutTexte = 'Rupture';
+                            $statutClass = 'badge-danger';
+                        } elseif ($produit['stock'] <= $produit['seuil_alerte']) {
+                            $stockClass = 'low-stock';
+                            $statutTexte = 'Stock faible';
+                            $statutClass = 'badge-warning';
+                        }
+                    ?>
+                <tr class="<?= $stockClass ?>">
+                    <td>
+                        <div class="produit-nom"><?= htmlspecialchars($produit['nom']) ?></div>
+                    </td>
+                    <td>
+                        <span class="badge badge-info"><?= htmlspecialchars($produit['categorie']) ?></span>
+                    </td>
+                    <td><?= htmlspecialchars($produit['description']) ?></td>
+                    <td><strong><?= number_format($produit['prix_vente'], 2) ?> DH</strong></td>
+                    <td>
+                        <div class="stock-indicator">
+                                <span class="badge <?= $statutClass ?>" style="font-size: 14px;">
+                                    <?= $produit['stock'] ?> unités
+                                </span>
+                        </div>
+                    </td>
+                    <td><?= $produit['seuil_alerte'] ?> unités</td>
+                    <td>
+                            <span class="badge <?= $statutClass ?>">
+                                <?= $statutTexte ?>
+                            </span>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Graphique simple -->
+        <div class="chart-container">
+            <h3>Répartition des stocks</h3>
+            <div class="progress-bars">
+                <?php foreach ($produitsFournis as $produit):
+                    $pourcentage = min(100, ($produit['stock'] / 20) * 100);
+                    $couleur = $produit['stock'] <= $produit['seuil_alerte'] ? '#ff6b6b' : '#28a745';
+                ?>
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span><?= htmlspecialchars($produit['nom']) ?></span>
+                        <span><?= $produit['stock'] ?> / 20</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: <?= $pourcentage ?>%; background: <?= $couleur ?>;"></div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Recherche en temps réel
+    document.getElementById('searchProduit').addEventListener('keyup', function() {
+        let searchValue = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#produitsTable tbody tr');
+
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchValue) ? '' : 'none';
+        });
+    });
+
+    // Filtre par catégorie
+    document.getElementById('filterCategorie').addEventListener('change', function() {
+        let categorie = this.value;
+        let rows = document.querySelectorAll('#produitsTable tbody tr');
+
+        rows.forEach(row => {
+            if (categorie === '') {
+                row.style.display = '';
+            } else {
+                let rowCategorie = row.querySelector('td:nth-child(2)').textContent;
+                row.style.display = rowCategorie.includes(categorie) ? '' : 'none';
+            }
+        });
+    });
+
+    // Filtre par état du stock
+    document.getElementById('filterStock').addEventListener('change', function() {
+        let filter = this.value;
+        let rows = document.querySelectorAll('#produitsTable tbody tr');
+
+        rows.forEach(row => {
+            if (filter === '') {
+                row.style.display = '';
+            } else {
+                let isLowStock = row.classList.contains('low-stock') || row.classList.contains('out-of-stock');
+                if (filter === 'alerte' && isLowStock) {
+                    row.style.display = '';
+                } else if (filter === 'normal' && !isLowStock) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Gestion Magasin</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-box">
+        <h1>Gestion de Magasin</h1>
+        <h2>Connexion</h2>
+
+        <div id="errorMessage" class="alert alert-error" style="display: none;"></div>
+
+        <form action="login.php" method="POST" class="login-form">
+            <div class="form-group">
+                <label for="email">Email ou identifiant</label>
+                <input type="text" id="email" name="email" required placeholder="exemple@email.com" autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn-login">Se connecter</button>
+        </form>
+
+        <div class="login-info">
+            <p>Comptes de démonstration :</p>
+            <ul>
+                <li><strong>Admin :</strong> admin@magasin.com / admin123</li>
+                <li><strong>Vendeur :</strong> vendeur@magasin.com / vendeur123</li>
+                <li><strong>Fournisseur :</strong> fournisseur@magasin.com / fournisseur123</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>
