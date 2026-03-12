@@ -8,6 +8,21 @@
     <link rel="stylesheet" href="css/caisse.css">
 </head>
 <body>
+<!-- Ajoute ce formulaire caché quelque part dans le body -->
+<form id="venteForm" method="POST" action="" style="display: none;">
+    <input type="hidden" name="action" value="encaisser">
+    <input type="hidden" name="panier" id="panierInput">
+    <input type="hidden" name="total" id="totalInput">
+    <input type="hidden" name="paiement" id="paiementInput">
+    <input type="hidden" name="client_nom" id="clientNomInput">
+</form>
+
+<!-- Message de notification -->
+<?php if (!empty($message)): ?>
+<div class="notification <?= $messageType ?>" style="position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 15px 20px; border-radius: 5px; background: <?= $messageType === 'success' ? '#d4edda' : '#f8d7da' ?>; color: <?= $messageType === 'success' ? '#155724' : '#721c24' ?>; border: 1px solid <?= $messageType === 'success' ? '#c3e6cb' : '#f5c6cb' ?>;">
+    <?= htmlspecialchars($message) ?>
+</div>
+<?php endif; ?>
 <div class="caisse-container">
     <!-- Header -->
     <header class="caisse-header">
@@ -43,20 +58,20 @@
             </div>
 
             <div class="produits-grid" id="produitsGrid">
-                <?php foreach ($produits as $produit): ?>
-                <div class="produit-card <?= $produit['stock'] <= 3 ? 'stock-faible' : '' ?>"
-                     data-id="<?= $produit['id'] ?>"
-                     data-nom="<?= htmlspecialchars($produit['nom']) ?>"
-                     data-prix="<?= $produit['prix'] ?>"
-                     data-stock="<?= $produit['stock'] ?>">
-                    <div class="produit-nom"><?= htmlspecialchars($produit['nom']) ?></div>
-                    <div class="produit-prix"><?= number_format($produit['prix'], 2) ?> DH</div>
+                <?php if (!empty($products) && is_array($products)): ?>
+                <?php foreach ($products as $produit): ?>
+                <div class="produit-card <?= ($produit['stock'] ?? 0) <= 3 ? 'stock-faible' : '' ?>"
+                     data-id="<?= $produit['id'] ?? '' ?>"
+                     data-nom="<?= htmlspecialchars($produit['nom'] ?? '') ?>"
+                     data-prix="<?= $produit['prix_vente'] ?? 0 ?>"
+                     data-stock="<?= $produit['stock'] ?? 0 ?>">
+                    <div class="produit-nom"><?= htmlspecialchars($produit['nom'] ?? '') ?></div>
+                    <div class="produit-prix"><?= number_format($produit['prix_vente'] ?? 0, 2) ?> DH</div>
                     <div class="produit-stock">
-                        Stock: <span class="<?= $produit['stock'] <= 3 ? 'text-danger' : '' ?>"><?= $produit['stock'] ?></span>
+                        Stock: <span class="<?= ($produit['stock'] ?? 0) <= 3 ? 'text-danger' : '' ?>"><?= $produit['stock'] ?? 0 ?></span>
                     </div>
-                    <?php $prod=$produit['id'];
-                    if ($produit['stock'] > 0): ?>
-                    <button class="btn-add-panier" onclick="ajouterAuPanier(<?php echo $produit['id']; ?>)">
+                    <?php if (($produit['stock'] ?? 0) > 0): ?>
+                    <button class="btn-add-panier" onclick="ajouterAuPanier(<?= $produit['id'] ?? 0 ?>)">
                         <i class="fas fa-cart-plus"></i> Ajouter
                     </button>
                     <?php else: ?>
@@ -64,6 +79,12 @@
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
+                <?php else: ?>
+                <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #666;">
+                    <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px; display: block;"></i>
+                    <p>Aucun produit disponible</p>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -122,6 +143,7 @@
     // Variables globales
     let panier = [];
 
+    // Fonction pour ajouter au panier
     // Fonction pour ajouter au panier
     function ajouterAuPanier(id) {
         let produitCard = document.querySelector(`.produit-card[data-id="${id}"]`);
@@ -223,6 +245,7 @@
     }
 
     // Fonction pour encaisser
+    // Fonction pour encaisser (remplace l'ancienne)
     function encaisser() {
         if (panier.length === 0) {
             alert('Panier vide!');
@@ -230,16 +253,41 @@
         }
 
         let total = parseFloat(document.getElementById('totalFinal').textContent);
-        let message = `Total à payer: ${total.toFixed(2)} DH\n\nChoisir le mode de paiement:`;
-        let modePaiement = prompt(message + '\n1: Espèces\n2: Carte\n3: Virement');
 
-        if (modePaiement === '1' || modePaiement === '2' || modePaiement === '3') {
-            let modes = ['', 'Espèces', 'Carte', 'Virement'];
-            alert(`Vente enregistrée! Paiement par ${modes[modePaiement]}`);
-            panier = [];
-            mettreAJourPanier();
+        // Demander le mode de paiement et le nom du client
+        let modePaiement = prompt('Mode de paiement ?\n1: Espèces\n2: Carte\n3: Virement', '2');
+        if (!modePaiement || modePaiement < 1 || modePaiement > 3) {
+            alert('Mode de paiement invalide');
+            return;
         }
+
+        let modes = ['', 'espèces', 'carte', 'virement'];
+        let paiement = modes[modePaiement];
+
+        let clientNom = prompt('Nom du client (optionnel) :', 'Client');
+        if (clientNom === null) return;
+        if (clientNom.trim() === '') clientNom = 'Client';
+
+        // Préparer les données pour l'envoi
+        document.getElementById('panierInput').value = JSON.stringify(panier);
+        document.getElementById('totalInput').value = total;
+        document.getElementById('paiementInput').value = paiement;
+        document.getElementById('clientNomInput').value = clientNom;
+
+        // Soumettre le formulaire
+        document.getElementById('venteForm').submit();
     }
+
+    // Fonction pour recharger les produits après une vente
+    function rechargerProduits() {
+        // Recharger la page pour avoir les stocks à jour
+        location.reload();
+    }
+
+    // Si la vente est réussie, on recharge après 2 secondes
+    <?php if ($messageType === 'success'): ?>
+    setTimeout(rechargerProduits, 2000);
+    <?php endif; ?>
 
     // Recherche de produits
     document.getElementById('searchProduit').addEventListener('keyup', function() {

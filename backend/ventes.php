@@ -1,7 +1,8 @@
 <?php
-// ventes.php - Gestion des ventes
+// backend/ventes.php
 session_start();
 require_once 'config/Database.php';
+require_once 'models/VenteModel.php';
 require_once 'models/UserModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
@@ -11,99 +12,60 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 $userName = $_SESSION['user']['name'];
 
-// Données simulées des ventes
-$ventes = [
-    [
-        'id' => 1001,
-        'date' => '2026-03-01 14:30',
-        'client' => 'Client A',
-        'vendeur' => 'Jean Dupont',
-        'produits' => [
-            ['nom' => 'iPhone 13', 'quantite' => 1, 'prix' => 999.99],
-            ['nom' => 'Coque iPhone', 'quantite' => 1, 'prix' => 29.99]
-        ],
-        'total' => 1029.98,
-        'statut' => 'payé',
-        'paiement' => 'carte'
-    ],
-    [
-        'id' => 1002,
-        'date' => '2026-03-01 11:15',
-        'client' => 'Client B',
-        'vendeur' => 'Marie Martin',
-        'produits' => [
-            ['nom' => 'Samsung Galaxy S21', 'quantite' => 1, 'prix' => 899.99],
-            ['nom' => 'Écran 24" LG', 'quantite' => 2, 'prix' => 229.99]
-        ],
-        'total' => 1359.97,
-        'statut' => 'payé',
-        'paiement' => 'espèces'
-    ],
-    [
-        'id' => 1003,
-        'date' => '2026-02-28 17:45',
-        'client' => 'Client C',
-        'vendeur' => 'Jean Dupont',
-        'produits' => [
-            ['nom' => 'Clavier Mécanique', 'quantite' => 1, 'prix' => 89.99],
-            ['nom' => 'Souris Sans Fil', 'quantite' => 1, 'prix' => 49.99]
-        ],
-        'total' => 139.98,
-        'statut' => 'en attente',
-        'paiement' => 'carte'
-    ],
-    [
-        'id' => 1004,
-        'date' => '2026-02-28 10:20',
-        'client' => 'Client D',
-        'vendeur' => 'Sophie Lefebvre',
-        'produits' => [
-            ['nom' => 'Ordinateur Dell XPS 13', 'quantite' => 1, 'prix' => 1499.99],
-            ['nom' => 'Sacoche ordinateur', 'quantite' => 1, 'prix' => 49.99]
-        ],
-        'total' => 1549.98,
-        'statut' => 'payé',
-        'paiement' => 'virement'
-    ],
-    [
-        'id' => 1005,
-        'date' => '2026-02-27 16:30',
-        'client' => 'Client E',
-        'vendeur' => 'Marie Martin',
-        'produits' => [
-            ['nom' => 'Casque Audio', 'quantite' => 2, 'prix' => 79.99]
-        ],
-        'total' => 159.98,
-        'statut' => 'annulé',
-        'paiement' => 'carte'
-    ],
-    [
-        'id' => 1006,
-        'date' => '2026-02-27 09:15',
-        'client' => 'Client F',
-        'vendeur' => 'Jean Dupont',
-        'produits' => [
-            ['nom' => 'iPhone 13', 'quantite' => 2, 'prix' => 999.99],
-            ['nom' => 'AirPods', 'quantite' => 2, 'prix' => 199.99]
-        ],
-        'total' => 2399.96,
-        'statut' => 'payé',
-        'paiement' => 'carte'
-    ]
-];
+// Initialiser les modèles
+$venteModel = new VenteModel();
+$userModel = new UserModel();
 
-// Statistiques
-$totalVentes = count($ventes);
-$chiffreAffaires = array_sum(array_column($ventes, 'total'));
-$ventesPayees = count(array_filter($ventes, function ($v) {
-    return $v['statut'] === 'payé';
-}));
-$ventesAttente = count(array_filter($ventes, function ($v) {
-    return $v['statut'] === 'en attente';
-}));
-
+// Gestion des actions
 $message = '';
 $messageType = '';
 
+// Annulation d'une vente
+if (isset($_GET['annuler']) && is_numeric($_GET['annuler'])) {
+    $venteId = (int)$_GET['annuler'];
+
+    try {
+        if ($venteModel->annulerVente($venteId)) {
+            $message = "Vente #$venteId annulée avec succès";
+            $messageType = 'success';
+        } else {
+            $message = "Erreur lors de l'annulation";
+            $messageType = 'error';
+        }
+    } catch (Exception $e) {
+        $message = "Erreur : " . $e->getMessage();
+        $messageType = 'error';
+    }
+}
+
+// Récupérer toutes les ventes avec détails
+$ventes = $venteModel->getVentesWithDetails();
+
+// Statistiques
+$stats = $venteModel->getStats();
+$totalVentes = $stats['nb_ventes'] ?? 0;
+$chiffreAffaires = $stats['ca_total'] ?? 0;
+$ventesAujourdhui = $stats['ventes_aujourdhui'] ?? 0;
+$caAujourdhui = $stats['ca_aujourdhui'] ?? 0;
+
+// Compter les ventes par statut
+$ventesPayees = 0;
+$ventesAttente = 0;
+$ventesAnnulees = 0;
+
+foreach ($stats['par_statut'] as $statut) {
+    if ($statut['statut'] === 'payé') $ventesPayees = $statut['count'];
+    if ($statut['statut'] === 'en attente') $ventesAttente = $statut['count'];
+    if ($statut['statut'] === 'annulé') $ventesAnnulees = $statut['count'];
+}
+
+$jours = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+$valeurs = [5200, 6800, 4300, 7900, 10200, 8500, 7200];
+$maxValeur = max($valeurs);
+
+echo "<!-- DEBUG: valeurs = " . print_r($valeurs, true) . " -->";
+echo "<!-- DEBUG: maxValeur = $maxValeur -->";
+
+// Inclure la vue
 include '../frontend/ventes.html';
 ?>

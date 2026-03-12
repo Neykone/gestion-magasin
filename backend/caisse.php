@@ -1,8 +1,9 @@
 <?php
-// caisse.php - Interface de caisse pour les vendeurs
+// backend/caisse.php
 session_start();
 require_once 'config/Database.php';
-require_once 'models/UserModel.php';
+require_once 'models/ProductModel.php';
+require_once 'models/VenteModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'vendeur') {
     header('Location: login.php');
@@ -10,55 +11,60 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'vendeur') {
 }
 
 $userName = $_SESSION['user']['name'];
+$userId = $_SESSION['user']['id'];
 
-// Données simulées des produits pour la caisse
-$produits = [
-    [
-        'id' => 1,
-        'nom' => 'iPhone 13',
-        'prix' => 999.99,
-        'stock' => 15,
-        'code_barre' => '123456789'
-    ],
-    [
-        'id' => 2,
-        'nom' => 'Samsung Galaxy S21',
-        'prix' => 899.99,
-        'stock' => 3,
-        'code_barre' => '987654321'
-    ],
-    [
-        'id' => 3,
-        'nom' => 'Ordinateur Dell XPS',
-        'prix' => 1499.99,
-        'stock' => 5,
-        'code_barre' => '456789123'
-    ],
-    [
-        'id' => 4,
-        'nom' => 'Écran 24" LG',
-        'prix' => 229.99,
-        'stock' => 8,
-        'code_barre' => '789123456'
-    ],
-    [
-        'id' => 5,
-        'nom' => 'Clavier Mécanique',
-        'prix' => 89.99,
-        'stock' => 12,
-        'code_barre' => '321654987'
-    ],
-    [
-        'id' => 6,
-        'nom' => 'Souris Sans Fil',
-        'prix' => 49.99,
-        'stock' => 2,
-        'code_barre' => '654987321'
-    ]
-];
+// Initialiser les modèles
+$productModel = new ProductModel();
+$venteModel = new VenteModel();
 
+// Récupérer tous les produits pour la caisse
+$products = $productModel->getAllProducts();  // ← C'est cette ligne qui est cruciale
+
+// Vérification (à supprimer après)
+if (empty($products)) {
+    $products = []; // Évite l'erreur si aucun produit
+}
+
+// Message de notification
 $message = '';
 $messageType = '';
+
+// Traitement du formulaire de vente
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'encaisser') {
+
+    $panier = json_decode($_POST['panier'], true);
+    $total = floatval($_POST['total']);
+    $paiement = $_POST['paiement'] ?? 'carte';
+    $clientNom = $_POST['client_nom'] ?? 'Client';
+
+    if (empty($panier)) {
+        $message = "Panier vide !";
+        $messageType = 'error';
+    } else {
+        try {
+            $venteId = $venteModel->createVente(
+                $userId,
+                $clientNom,
+                $total,
+                $paiement,
+                $panier
+            );
+
+            $message = "Vente #$venteId enregistrée avec succès !";
+            $messageType = 'success';
+
+            // Recharger les produits après la vente (pour mettre à jour les stocks)
+            $products = $productModel->getAllProducts();
+
+        } catch (Exception $e) {
+            $message = "Erreur : " . $e->getMessage();
+            $messageType = 'error';
+        }
+    }
+}
+
+// DEBUG - À SUPPRIMER PLUS TARD
+// echo "<!-- Nombre de produits : " . count($products) . " -->";
 
 include '../frontend/caisse.html';
 ?>

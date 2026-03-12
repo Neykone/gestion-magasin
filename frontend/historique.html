@@ -24,13 +24,14 @@
     <!-- Contenu principal -->
     <div class="historique-content">
         <!-- Statistiques -->
+
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon blue">
                     <i class="fas fa-shopping-cart"></i>
                 </div>
                 <div class="stat-details">
-                    <h3>Total Ventes</h3>
+                    <h3>Mes Ventes</h3>
                     <span class="stat-number"><?= $totalVentes ?></span>
                 </div>
             </div>
@@ -63,95 +64,46 @@
             </div>
         </div>
 
-        <!-- Filtres et recherche -->
-        <div class="filtres-section">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchVente" placeholder="Rechercher par ID, client...">
-            </div>
-            <div class="filter-group">
-                <select id="filterPeriode" class="filter-select">
-                    <option value="all">Toutes les périodes</option>
-                    <option value="today">Aujourd'hui</option>
-                    <option value="week">Cette semaine</option>
-                    <option value="month">Ce mois</option>
-                </select>
-                <select id="filterStatut" class="filter-select">
-                    <option value="all">Tous les statuts</option>
-                    <option value="payé">Payé</option>
-                    <option value="annulé">Annulé</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Tableau de l'historique -->
-        <div class="table-container">
-            <table id="historiqueTable">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Date</th>
-                    <th>Client</th>
-                    <th>Produits</th>
-                    <th>Total</th>
-                    <th>Paiement</th>
-                    <th>Statut</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($historiqueVentes as $vente):
-        // Vérification que $vente est bien un tableau
-        if (!is_array($vente)) continue;
-    ?>
-                <tr class="<?= isset($vente['statut']) && $vente['statut'] === 'annulé' ? 'row-annulee' : '' ?>">
-                    <td><strong>#<?= isset($vente['id']) ? $vente['id'] : '' ?></strong></td>
-                    <td>
-                        <i class="fas fa-calendar" style="color: #667eea;"></i>
-                        <?= isset($vente['date']) ? htmlspecialchars($vente['date']) : '' ?>
-                    </td>
-                    <td><?= isset($vente['client']) ? htmlspecialchars($vente['client']) : '' ?></td>
-                    <td>
-                        <?php if (isset($vente['id'])): ?>
-                        <button class="btn-details" onclick="toggleDetails(<?= $vente['id'] ?>)">
-                            <i class="fas fa-eye"></i> Voir détails
-                        </button>
-                        <?php endif; ?>
-                        <div id="details-<?= isset($vente['id']) ? $vente['id'] : '' ?>" class="vente-details" style="display: none;">
-                            <?php if (isset($vente['produits']) && is_array($vente['produits'])): ?>
-                            <?php foreach ($vente['produits'] as $produit): ?>
-                            <div class="produit-ligne">
-                                <span><?= isset($produit['nom']) ? htmlspecialchars($produit['nom']) : '' ?></span>
-                                <span>x<?= isset($produit['quantite']) ? $produit['quantite'] : '' ?></span>
-                                <span><?= isset($produit['prix']) ? number_format($produit['prix'], 2) : '' ?> DH</span>
-                            </div>
-                            <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
-                    </td>
-                    <td><strong><?= isset($vente['total']) ? number_format($vente['total'], 2) : '' ?> DH</strong></td>
-                    <td>
-            <span class="badge badge-paiement">
-                <i class="fas <?= isset($vente['paiement']) && $vente['paiement'] === 'carte' ? 'fa-credit-card' : 'fa-money-bill' ?>"></i>
-                <?= isset($vente['paiement']) ? ucfirst($vente['paiement']) : '' ?>
-            </span>
-                    </td>
-                    <td>
-            <span class="badge <?= isset($vente['statut']) && $vente['statut'] === 'payé' ? 'badge-success' : 'badge-danger' ?>">
-                <?= isset($vente['statut']) ? ucfirst($vente['statut']) : '' ?>
-            </span>
-                    </td>
-                    <td>
-                        <?php if (isset($vente['id'])): ?>
-                        <button class="btn-print" onclick="imprimerTicket(<?= $vente['id'] ?>)" title="Imprimer ticket">
-                            <i class="fas fa-print"></i>
-                        </button>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+        <!-- Tableau des ventes -->
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Produits</th>
+                <th>Total</th>
+                <th>Paiement</th>
+                <th>Statut</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($ventes as $vente): ?>
+            <tr class="<?= $vente['statut'] === 'annulé' ? 'row-annulee' : '' ?>">
+                <td>#<?= $vente['id'] ?></td>
+                <td><?= date('d/m/Y H:i', strtotime($vente['date_vente'])) ?></td>
+                <td><?= htmlspecialchars($vente['client_nom'] ?? 'Client') ?></td>
+                <td>
+                    <button onclick="toggleDetails(<?= $vente['id'] ?>)">
+                        <?= count($vente['produits'] ?? []) ?> produit(s)
+                    </button>
+                    <div id="details-<?= $vente['id'] ?>" style="display: none;">
+                        <?php foreach ($vente['produits'] as $produit): ?>
+                        <div><?= $produit['produit_nom'] ?> x<?= $produit['quantite'] ?></div>
+                        <?php endforeach; ?>
+                    </div>
+                </td>
+                <td><?= number_format($vente['total'], 2) ?> DH</td>
+                <td><?= ucfirst($vente['paiement']) ?></td>
+                <td>
+                <span class="badge <?= $vente['statut'] === 'payé' ? 'badge-success' : 'badge-danger' ?>">
+                    <?= ucfirst($vente['statut']) ?>
+                </span>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
         </div>
 
         <!-- Pagination -->
