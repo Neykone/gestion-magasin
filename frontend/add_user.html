@@ -189,19 +189,20 @@
                         </div>
                     </div>
 
-                    <?php if (($_POST['role'] ?? 'vendeur') === 'fournisseur'): ?>
-                    <div class="form-group">
+                    <!-- Champ fournisseur - visible seulement si le rôle est fournisseur -->
+                    <div class="form-group" id="fournisseur_group" style="display: <?= ($_POST['role'] ?? '') === 'fournisseur' ? 'block' : 'none' ?>;">
                         <label for="fournisseur_id">Fournisseur associé</label>
                         <select id="fournisseur_id" name="fournisseur_id">
                             <option value="">-- Sélectionner un fournisseur --</option>
                             <?php foreach ($fournisseurs as $fournisseur): ?>
-                            <option value="<?= $fournisseur->getId() ?>">
-                                <?= htmlspecialchars($fournisseur->getNom()) ?>
+                            <option value="<?= $fournisseur->getId() ?>"
+                            <?= ($_POST['fournisseur_id'] ?? '') == $fournisseur->getId() ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($fournisseur->getNom()) ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
+                        <small style="color: #666;">Requis pour les utilisateurs fournisseurs</small>
                     </div>
-                    <?php endif; ?>
 
                     <div class="form-actions">
                         <button type="submit" class="btn-submit">
@@ -220,15 +221,16 @@
 <script>
     // Afficher le champ fournisseur uniquement si le rôle fournisseur est sélectionné
     document.getElementById('role').addEventListener('change', function() {
-        let fournisseurGroup = document.querySelector('.form-group:has(#fournisseur_id)');
-        if (fournisseurGroup) {
-            if (this.value === 'fournisseur') {
-                fournisseurGroup.style.display = 'block';
-            } else {
-                fournisseurGroup.style.display = 'none';
-            }
+        let fournisseurGroup = document.getElementById('fournisseur_group');
+        if (this.value === 'fournisseur') {
+            fournisseurGroup.style.display = 'block';
+        } else {
+            fournisseurGroup.style.display = 'none';
+            // Optionnel : vider la sélection quand on cache
+            document.getElementById('fournisseur_id').value = '';
         }
     });
 </script>
+
 </body>
 </html>

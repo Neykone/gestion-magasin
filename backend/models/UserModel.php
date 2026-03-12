@@ -165,5 +165,16 @@ class UserModel {
         }
         return $users;
     }
+
+    public function getUserByFournisseurId($fournisseurId) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE fournisseur_id = ?");
+        $stmt->execute([$fournisseurId]);
+        $data = $stmt->fetch();
+
+        if ($data) {
+            return new User($data);
+        }
+        return null;
+    }
 }
 ?>

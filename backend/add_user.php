@@ -52,6 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Cet email est déjà utilisé";
     }
 
+    // SOLUTION 2 : Vérifier que si le rôle est fournisseur, on a un fournisseur_id
+    if ($role === 'fournisseur' && empty($fournisseur_id)) {
+        $errors[] = "Pour un utilisateur fournisseur, vous devez sélectionner un fournisseur associé";
+    }
+
     if (empty($errors)) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
