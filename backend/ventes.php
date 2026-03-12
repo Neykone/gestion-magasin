@@ -1,6 +1,8 @@
 <?php
 // ventes.php - Gestion des ventes
 session_start();
+require_once 'config/Database.php';
+require_once 'models/UserModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -103,5 +105,5 @@ $ventesAttente = count(array_filter($ventes, function ($v) {
 $message = '';
 $messageType = '';
 
-include 'ventes.html';
+include '../frontend/ventes.html';
 ?>

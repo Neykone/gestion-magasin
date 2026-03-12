@@ -1,6 +1,8 @@
 <?php
 // fournisseur_dashboard.php - Dashboard pour les fournisseurs
 session_start();
+require_once 'config/Database.php';
+require_once 'models/UserModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'fournisseur') {
     header('Location: login.php');
@@ -49,5 +51,5 @@ $produitsAlerte = count(array_filter($produitsFournis, function ($p) {
     return $p['stock'] <= $p['seuil_alerte'];
 }));
 
-include 'fournisseur_dashboard.html';
+include '../frontend/fournisseur_dashboard.html';
 ?>

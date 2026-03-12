@@ -1,6 +1,8 @@
 <?php
 // caisse.php - Interface de caisse pour les vendeurs
 session_start();
+require_once 'config/Database.php';
+require_once 'models/UserModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'vendeur') {
     header('Location: login.php');
@@ -58,5 +60,5 @@ $produits = [
 $message = '';
 $messageType = '';
 
-include 'caisse.html';
+include '../frontend/caisse.html';
 ?>

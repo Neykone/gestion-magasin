@@ -1,7 +1,7 @@
 <?php
 // login.php - Version avec base de données
 session_start();
-
+require_once 'config/Database.php';
 // Inclure le modèle UserModel
 require_once 'models/UserModel.php';
 
@@ -53,5 +53,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Inclure la vue (le HTML ne change pas)
-include 'login.html';
+include '../frontend/login.html';
 ?>

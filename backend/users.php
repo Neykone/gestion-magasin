@@ -56,5 +56,5 @@ $fournisseurs = count(array_filter($users, function ($u) {
     return $u['role'] === 'fournisseur';
 }));
 
-include 'users.html';
+include '../frontend/users.html';
 ?>

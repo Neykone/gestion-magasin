@@ -1,6 +1,8 @@
 <?php
 // products.php - Gestion des produits
 session_start();
+require_once 'config/Database.php';
+require_once 'models/UserModel.php';
 
 // Vérifier si l'utilisateur est connecté ET est admin
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
@@ -113,5 +115,5 @@ if (isset($_GET['edit_test'])) {
 }
 
 // Inclure la vue
-include 'products.html';
+include '../frontend/products.html';
 ?>

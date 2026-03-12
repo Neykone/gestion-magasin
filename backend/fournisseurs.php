@@ -1,6 +1,8 @@
 <?php
 // fournisseurs.php - Gestion des fournisseurs
 session_start();
+require_once 'config/Database.php';
+require_once 'models/UserModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -82,5 +84,5 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $messageType = 'success';
 }
 
-include 'fournisseurs.html';
+include '../frontend/fournisseurs.html';
 ?>

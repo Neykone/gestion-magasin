@@ -1,6 +1,8 @@
 <?php
 // admin.php
 session_start();
+require_once 'config/Database.php';
+require_once 'models/UserModel.php';
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
@@ -13,5 +15,6 @@ $userName = $_SESSION['user']['name'];
 $userRole = $_SESSION['user']['role'];
 
 // Inclure le template HTML
-include 'admin.html';
+include '../frontend/admin.html';
+
 ?>

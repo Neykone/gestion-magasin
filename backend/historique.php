@@ -1,6 +1,8 @@
 <?php
 // historique.php - Historique des ventes pour le vendeur
 session_start();
+require_once 'config/Database.php';
+require_once 'models/UserModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'vendeur') {
     header('Location: login.php');
@@ -87,5 +89,5 @@ $ventesAnnulees = count(array_filter($historiqueVentes, function ($v) {
 $message = '';
 $messageType = '';
 
-include 'historique.html';
+include '../frontend/historique.html';
 ?>
