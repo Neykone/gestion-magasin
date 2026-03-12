@@ -134,7 +134,7 @@
                             <small style="color: #666;"><?= htmlspecialchars($product['description']) ?></small>
                         </td>
                         <td>
-                            <span class="badge badge-info"><?= htmlspecialchars($product['categorie']) ?></span>
+                            <span class="badge badge-info"><?= htmlspecialchars($product['categorie_nom'] ?? 'Non catégorisé') ?></span>
                         </td>
                         <td><?= number_format($product['prix_achat'], 2) ?> DH</td>
                         <td><strong><?= number_format($product['prix_vente'], 2) ?> DH</strong></td>
@@ -164,13 +164,13 @@
                                 <?php endif; ?>
                             </div>
                         </td>
-                        <td><?= htmlspecialchars($product['fournisseur']) ?></td>
+                        <td><?= htmlspecialchars($product['fournisseur_nom'] ?? 'Non spécifié') ?></td>
                         <td>
                             <?php
                             $productName=$product['nom'];
                             ?>
                             <div class="actions">
-                                <a href="#" class="btn-edit" title="Modifier">
+                                <a href="../backend/edit_product.php?id=<?= $product['id'] ?>" class="btn-edit" title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="?delete=<?= $product['id'] ?>"

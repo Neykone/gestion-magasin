@@ -83,7 +83,7 @@
 
             <!-- Bouton Ajouter -->
             <div style="margin-bottom: 20px; text-align: right;">
-                <a href="#" class="btn-add" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px;">
+                <a href="../backend/add_user.php" class="btn-add" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px;">
                     <i class="fas fa-plus"></i>
                     Nouvel Utilisateur
                 </a>
@@ -138,7 +138,7 @@
                         </td>
                         <td>
                             <div class="actions">
-                                <a href="#" class="btn-edit" title="Modifier">
+                                <a href="../backend/edit_user.php?id=<?= $user['id'] ?>" class="btn-edit" title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="?delete=<?= $user['id'] ?>"

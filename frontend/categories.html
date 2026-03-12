@@ -79,7 +79,7 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 style="font-size: 20px; color: #333;">Liste des catégories</h2>
-                <a href="#" class="btn-add" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px;">
+                <a href="../backend/add_categorie.php" class="btn-add" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px;">
                     <i class="fas fa-plus"></i>
                     Nouvelle Catégorie
                 </a>
@@ -111,7 +111,7 @@
                         </td>
                         <td><?= htmlspecialchars($categorie['description'] ?? '') ?></td>
                         <td>
-                            <span class="badge badge-info"><?= $categorie['nb_produits'] ?> produits</span>
+                            <span class="badge badge-info"><?= isset($categorie['nb_produits']) ? $categorie['nb_produits'] : '0' ?> produits</span>
                         </td>
                         <td>
                                 <span class="badge <?= $categorie['statut'] === 'actif' ? 'badge-success' : 'badge-warning' ?>">
@@ -123,7 +123,7 @@
                             $catName=$categorie['nom'];
                             ?>
                             <div class="actions">
-                                <a href="#" class="btn-edit" title="Modifier">
+                                <a href="../backend/edit_categorie.php?id=<?= $categorie['id'] ?>" class="btn-edit" title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="?delete=<?= $categorie['id'] ?>"
@@ -150,7 +150,7 @@
                     if ($categorie['statut'] === 'actif') {
                         $categoriesActives++;
                     }
-                    $totalProduitsCategories += $categorie['nb_produits'];
+                    $totalProduitsCategories += isset($cat['nb_produits']) ? $cat['nb_produits'] : 0;
                 }
                 ?>
                 <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">

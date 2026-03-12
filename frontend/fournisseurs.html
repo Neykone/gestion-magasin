@@ -79,7 +79,7 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 style="font-size: 20px; color: #333;">Liste des fournisseurs</h2>
-                <a href="#" class="btn-add" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px;">
+                <a href="../backend/add_fournisseur.php" class="btn-add" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px;">
                     <i class="fas fa-plus"></i>
                     Nouveau Fournisseur
                 </a>
@@ -144,7 +144,7 @@
                             $fourNames=$fournisseur['nom'];
                             ?>
                             <div class="actions">
-                                <a href="#" class="btn-edit" title="Modifier">
+                                <a href="../backend/edit_fournisseur.php?id=<?= $fournisseur['id'] ?>" class="btn-edit" title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <a href="?delete=<?= $fournisseur['id'] ?>"

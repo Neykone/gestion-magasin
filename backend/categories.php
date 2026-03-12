@@ -1,8 +1,8 @@
 <?php
-// categories.php - Gestion des catégories
+// backend/categories.php
 session_start();
 require_once 'config/Database.php';
-require_once 'models/UserModel.php';
+require_once 'models/CategorieModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -11,52 +11,32 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 $userName = $_SESSION['user']['name'];
 
-// Données simulées des catégories
-$categories = [
-    [
-        'id' => 1,
-        'nom' => 'Électronique',
-        'description' => 'Tous les appareils électroniques',
-        'nb_produits' => 12,
-        'statut' => 'actif'
-    ],
-    [
-        'id' => 2,
-        'nom' => 'Informatique',
-        'description' => 'Ordinateurs, écrans, accessoires PC',
-        'nb_produits' => 8,
-        'statut' => 'actif'
-    ],
-    [
-        'id' => 3,
-        'nom' => 'Accessoires',
-        'description' => 'Câbles, adaptateurs, supports',
-        'nb_produits' => 15,
-        'statut' => 'actif'
-    ],
-    [
-        'id' => 4,
-        'nom' => 'Audio',
-        'description' => 'Casques, écouteurs, enceintes',
-        'nb_produits' => 6,
-        'statut' => 'actif'
-    ],
-    [
-        'id' => 5,
-        'nom' => 'Téléphonie',
-        'description' => 'Smartphones, accessoires téléphone',
-        'nb_produits' => 9,
-        'statut' => 'inactif'
-    ]
-];
+// Initialiser le modèle
+$categorieModel = new CategorieModel();
 
+// Gestion des actions
 $message = '';
 $messageType = '';
 
+// Suppression d'une catégorie
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
-    $message = "Catégorie supprimée (simulation)";
-    $messageType = 'success';
+    $deleteId = (int)$_GET['delete'];
+
+    if ($categorieModel->deleteCategorie($deleteId)) {
+        $message = "Catégorie supprimée avec succès";
+        $messageType = 'success';
+    } else {
+        $message = "Impossible de supprimer cette catégorie (utilisée par des produits)";
+        $messageType = 'error';
+    }
 }
+
+// Récupérer toutes les catégories
+$categories = $categorieModel->getAllCategories();
+
+// Statistiques
+$totalCategories = count($categories);
+$categoriesActives = count(array_filter($categories, fn($c) => ($c['statut'] ?? 'actif') === 'actif'));
 
 include '../frontend/categories.html';
 ?>

@@ -119,8 +119,8 @@
                     <td>
                         <div class="produit-nom"><?= htmlspecialchars($produit['nom']) ?></div>
                     </td>
-                    <td>
-                        <span class="badge badge-info"><?= htmlspecialchars($produit['categorie']) ?></span>
+                    <td data-categorie="<?= htmlspecialchars($produit['categorie_nom'] ?? 'Non catégorisé') ?>">
+                        <span class="badge badge-info"><?= htmlspecialchars($produit['categorie_nom'] ?? 'Non catégorisé') ?></span>
                     </td>
                     <td><?= htmlspecialchars($produit['description']) ?></td>
                     <td><strong><?= number_format($produit['prix_vente'], 2) ?> DH</strong></td>
@@ -178,7 +178,7 @@
         });
     });
 
-    // Filtre par catégorie
+    // Filtre par catégorie - CORRIGÉ
     document.getElementById('filterCategorie').addEventListener('change', function() {
         let categorie = this.value;
         let rows = document.querySelectorAll('#produitsTable tbody tr');
@@ -187,8 +187,17 @@
             if (categorie === '') {
                 row.style.display = '';
             } else {
-                let rowCategorie = row.querySelector('td:nth-child(2)').textContent;
-                row.style.display = rowCategorie.includes(categorie) ? '' : 'none';
+                // Récupère la cellule catégorie (2ème colonne)
+                let categorieCell = row.querySelector('td:nth-child(2)');
+                if (categorieCell) {
+                    let categorieText = categorieCell.textContent.trim();
+                    // Vérifie si le texte de la catégorie contient la valeur sélectionnée
+                    if (categorieText.includes(categorie)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
             }
         });
     });
