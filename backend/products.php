@@ -18,6 +18,18 @@ $productModel = new ProductModel();
 $categorieModel = new CategorieModel();
 $fournisseurModel = new FournisseurModel();
 
+// Pagination
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 10; // Nombre de produits par page
+$offset = ($page - 1) * $limit;
+
+// Compter le nombre total de produits
+$totalProduits = $productModel->countProducts();
+$totalPages = ceil($totalProduits / $limit);
+
+// Récupérer les produits avec pagination
+$products = $productModel->getProductsPaginated($limit, $offset);
+
 // Gestion des actions
 $message = '';
 $messageType = '';

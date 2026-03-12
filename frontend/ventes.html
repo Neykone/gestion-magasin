@@ -135,6 +135,29 @@
                     </select>
                 </div>
                 <div>
+                    <!-- Formulaire de filtre pour l'export -->
+                    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 15px;">Export PDF</h3>
+                        <form action="../backend/export_ventes_filtre.php" method="GET" style="display: flex; gap: 15px; align-items: flex-end;">
+                            <div style="flex: 1;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Date début</label>
+                                <input type="date" name="date_debut" value="<?= date('Y-m-01') ?>" style="width: 100%; padding: 10px; border: 2px solid #e1e1e1; border-radius: 5px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Date fin</label>
+                                <input type="date" name="date_fin" value="<?= date('Y-m-d') ?>" style="width: 100%; padding: 10px; border: 2px solid #e1e1e1; border-radius: 5px;">
+                            </div>
+                            <div>
+                                <button type="submit" style="background: #dc3545; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer;">
+                                    <i class="fas fa-file-pdf"></i> Générer PDF
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="../backend/export_ventes.php" class="btn-export" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: #dc3545; color: white; border-radius: 5px; text-decoration: none;">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </a>
                     <a href="#" class="btn-add" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px;">
                         <i class="fas fa-plus"></i>
                         Nouvelle Vente
@@ -217,23 +240,20 @@
             </div>
 
             <!-- Graphique d'évolution -->
-            <!-- Graphique d'évolution -->
-            <div style="margin-top: 30px; background: white; border-radius: 10px; padding: 20px;">
+            <!-- Graphique d'évolution - Version barres simples -->
+            <div style="margin-top: 30px; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h2 style="font-size: 18px; color: #333; margin-bottom: 20px;">Évolution des ventes (7 derniers jours)</h2>
                 <div style="display: flex; align-items: flex-end; gap: 10px; height: 200px;">
                     <?php foreach ($valeurs as $i => $valeur): ?>
                     <?php $hauteur = ($valeur / $maxValeur) * 180; ?>
                     <div style="flex: 1; text-align: center;">
-                        <div style="height: <?= $hauteur ?>px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 5px 5px 0 0;"></div>
+                        <div style="height: <?= $hauteur ?>px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 5px 5px 0 0; transition: height 0.3s;"></div>
                         <div style="margin-top: 10px; font-size: 12px; color: #666;"><?= $jours[$i] ?></div>
                         <div style="font-size: 11px; font-weight: bold;"><?= number_format($valeur, 0) ?> DH</div>
                     </div>
                     <?php endforeach; ?>
                 </div>
             </div>
-        </div>
-    </main>
-</div>
 
 <script>
     // Fonction pour afficher/masquer les détails des produits

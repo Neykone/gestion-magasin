@@ -150,6 +150,29 @@ class ProductModel {
     }
 
     /**
+     * Récupérer les produits en rupture de stock
+     */
+    public function getOutOfStockProducts() {
+        $sql = "SELECT p.*, 
+                   c.nom as categorie_nom,
+                   f.nom as fournisseur_nom
+            FROM produits p
+            LEFT JOIN categories c ON p.categorie_id = c.id
+            LEFT JOIN fournisseurs f ON p.fournisseur_id = f.id
+            WHERE p.stock = 0
+            ORDER BY p.nom ASC";
+
+        $stmt = $this->db->query($sql);
+        $data = $stmt->fetchAll();
+
+        $products = [];
+        foreach ($data as $row) {
+            $products[] = new Product($row);
+        }
+        return $products;
+    }
+
+    /**
      * Récupérer les produits par fournisseur
      */
     public function getProductsBySupplier($fournisseurId) {
@@ -186,6 +209,30 @@ class ProductModel {
         $stmt = $this->db->query("SELECT SUM(prix_achat * stock) as total FROM produits");
         $result = $stmt->fetch();
         return $result['total'] ?? 0;
+    }
+
+    /**
+     * Récupérer les produits avec pagination
+     */
+    public function getProductsPaginated($limit, $offset) {
+        $sql = "SELECT p.*, 
+                   c.nom as categorie_nom, 
+                   f.nom as fournisseur_nom 
+            FROM produits p
+            LEFT JOIN categories c ON p.categorie_id = c.id
+            LEFT JOIN fournisseurs f ON p.fournisseur_id = f.id
+            ORDER BY p.id DESC
+            LIMIT ? OFFSET ?";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$limit, $offset]);
+        $data = $stmt->fetchAll();
+
+        $products = [];
+        foreach ($data as $row) {
+            $products[] = new Product($row);
+        }
+        return $products;
     }
 }
 ?>

@@ -13,19 +13,16 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 $userName = $_SESSION['user']['name'];
 
-// Initialiser les modèles
 $categorieModel = new CategorieModel();
 $fournisseurModel = new FournisseurModel();
 $productModel = new ProductModel();
 
-// Récupérer les listes pour les selects
 $categories = $categorieModel->getAllCategories();
 $fournisseurs = $fournisseurModel->getAllFournisseurs();
 
 $message = '';
 $messageType = '';
 
-// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'] ?? '';
     $description = $_POST['description'] ?? '';
@@ -43,7 +40,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Le prix de vente doit être supérieur à 0";
         $messageType = 'error';
     } else {
-        if ($productModel->addProduct($nom, $description, $prix_achat, $prix_vente, $stock, $seuil_alerte, $categorie_id, $fournisseur_id)) {
+        $product = new Product([
+            'nom' => $nom,
+            'description' => $description,
+            'prix_achat' => $prix_achat,
+            'prix_vente' => $prix_vente,
+            'stock' => $stock,
+            'seuil_alerte' => $seuil_alerte,
+            'categorie_id' => $categorie_id,
+            'fournisseur_id' => $fournisseur_id
+        ]);
+
+        if ($productModel->addProduct($product)) {
             $message = "Produit ajouté avec succès !";
             $messageType = 'success';
         } else {

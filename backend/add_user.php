@@ -3,6 +3,8 @@
 session_start();
 require_once 'config/Database.php';
 require_once 'models/UserModel.php';
+require_once 'models/FournisseurModel.php';
+require_once 'models/entities/User.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -11,21 +13,22 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 $userName = $_SESSION['user']['name'];
 
-// Initialiser le modèle
 $userModel = new UserModel();
+$fournisseurModel = new FournisseurModel();
+
+$fournisseurs = $fournisseurModel->getAllFournisseurs();
 
 $message = '';
 $messageType = '';
 
-// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     $role = $_POST['role'] ?? 'vendeur';
     $statut = $_POST['statut'] ?? 'actif';
+    $fournisseur_id = !empty($_POST['fournisseur_id']) ? intval($_POST['fournisseur_id']) : null;
 
-    // Validation
     $errors = [];
 
     if (empty($nom)) {
@@ -44,19 +47,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Le mot de passe doit contenir au moins 6 caractères";
     }
 
-    // Vérifier si l'email existe déjà
-    if (empty($errors)) {
-        $existingUser = $userModel->getUserByEmail($email);
-        if ($existingUser) {
-            $errors[] = "Cet email est déjà utilisé";
-        }
+    $existingUser = $userModel->getUserByEmail($email);
+    if ($existingUser) {
+        $errors[] = "Cet email est déjà utilisé";
     }
 
     if (empty($errors)) {
-        // Hacher le mot de passe
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        if ($userModel->addUser($nom, $email, $hashedPassword, $role, $statut)) {
+        $user = new User([
+            'nom' => $nom,
+            'email' => $email,
+            'password' => $hashedPassword,
+            'role' => $role,
+            'statut' => $statut,
+            'fournisseur_id' => $fournisseur_id
+        ]);
+
+        if ($userModel->addUser($user)) {
             $message = "Utilisateur ajouté avec succès !";
             $messageType = 'success';
         } else {

@@ -13,23 +13,15 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'vendeur') {
 $userName = $_SESSION['user']['name'];
 $userId = $_SESSION['user']['id'];
 
-// Initialiser les modèles
 $productModel = new ProductModel();
 $venteModel = new VenteModel();
 
-// Récupérer tous les produits pour la caisse
-$products = $productModel->getAllProducts();  // ← C'est cette ligne qui est cruciale
+// Récupérer tous les produits
+$products = $productModel->getAllProducts();
 
-// Vérification (à supprimer après)
-if (empty($products)) {
-    $products = []; // Évite l'erreur si aucun produit
-}
-
-// Message de notification
 $message = '';
 $messageType = '';
 
-// Traitement du formulaire de vente
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'encaisser') {
 
     $panier = json_decode($_POST['panier'], true);
@@ -53,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $message = "Vente #$venteId enregistrée avec succès !";
             $messageType = 'success';
 
-            // Recharger les produits après la vente (pour mettre à jour les stocks)
+            // Recharger les produits après la vente
             $products = $productModel->getAllProducts();
 
         } catch (Exception $e) {
@@ -62,9 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
     }
 }
-
-// DEBUG - À SUPPRIMER PLUS TARD
-// echo "<!-- Nombre de produits : " . count($products) . " -->";
 
 include '../frontend/caisse.html';
 ?>

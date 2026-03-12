@@ -3,6 +3,7 @@
 session_start();
 require_once 'config/Database.php';
 require_once 'models/CategorieModel.php';
+require_once 'models/entities/Categorie.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -24,7 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Le nom de la catégorie est obligatoire";
         $messageType = 'error';
     } else {
-        if ($categorieModel->addCategorie($nom, $description)) {
+        $categorie = new Categorie([
+            'nom' => $nom,
+            'description' => $description
+        ]);
+
+        if ($categorieModel->addCategorie($categorie)) {
             $message = "Catégorie ajoutée avec succès !";
             $messageType = 'success';
         } else {

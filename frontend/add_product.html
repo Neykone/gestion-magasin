@@ -38,7 +38,6 @@
             border: 2px solid #e1e1e1;
             border-radius: 5px;
             font-size: 16px;
-            transition: border-color 0.3s;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
@@ -58,10 +57,6 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.3s;
-        }
-        .btn-submit:hover {
-            opacity: 0.9;
         }
         .btn-cancel {
             background: #6c757d;
@@ -69,9 +64,6 @@
             padding: 15px 30px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
             text-decoration: none;
             display: inline-block;
         }
@@ -100,19 +92,18 @@
 <body>
 <div class="admin-container">
     <nav class="sidebar">
-        <!-- Menu latéral identique à admin.html -->
         <div class="sidebar-header">
             <h2>Gestion Magasin</h2>
             <p>Administrateur</p>
         </div>
         <ul class="sidebar-menu">
-            <li><a href="admin.php"><i class="fas fa-home"></i> Dashboard</a></li>
-            <li><a href="users.php"><i class="fas fa-users"></i> Utilisateurs</a></li>
-            <li class="active"><a href="products.php"><i class="fas fa-box"></i> Produits</a></li>
-            <li><a href="categories.php"><i class="fas fa-tags"></i> Catégories</a></li>
-            <li><a href="fournisseurs.php"><i class="fas fa-truck"></i> Fournisseurs</a></li>
-            <li><a href="ventes.php"><i class="fas fa-chart-line"></i> Ventes</a></li>
-            <li class="logout"><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            <li><a href="../backend/admin.php"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="../backend/users.php"><i class="fas fa-users"></i> Utilisateurs</a></li>
+            <li class="active"><a href="../backend/products.php"><i class="fas fa-box"></i> Produits</a></li>
+            <li><a href="../backend/categories.php"><i class="fas fa-tags"></i> Catégories</a></li>
+            <li><a href="../backend/fournisseurs.php"><i class="fas fa-truck"></i> Fournisseurs</a></li>
+            <li><a href="../backend/ventes.php"><i class="fas fa-chart-line"></i> Ventes</a></li>
+            <li class="logout"><a href="../backend/logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
         </ul>
     </nav>
 
@@ -138,7 +129,7 @@
                 </div>
                 <?php endif; ?>
 
-                <form method="POST" action="">
+                <form method="POST" action="../backend/add_product.php">
                     <div class="form-group">
                         <label for="nom">Nom du produit *</label>
                         <input type="text" id="nom" name="nom" required placeholder="Ex: iPhone 13">
@@ -177,7 +168,7 @@
                             <select id="categorie_id" name="categorie_id">
                                 <option value="">-- Sélectionner une catégorie --</option>
                                 <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['nom']) ?></option>
+                                <option value="<?= $cat->getId() ?>"><?= htmlspecialchars($cat->getNom()) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -186,7 +177,7 @@
                             <select id="fournisseur_id" name="fournisseur_id">
                                 <option value="">-- Sélectionner un fournisseur --</option>
                                 <?php foreach ($fournisseurs as $four): ?>
-                                <option value="<?= $four['id'] ?>"><?= htmlspecialchars($four['nom']) ?></option>
+                                <option value="<?= $four->getId() ?>"><?= htmlspecialchars($four->getNom()) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

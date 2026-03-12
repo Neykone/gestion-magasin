@@ -68,40 +68,57 @@ class UserModel {
     /**
      * Ajouter un nouvel utilisateur (utilise un objet User)
      */
+    /**
+     * Ajouter un nouvel utilisateur (utilise un objet User)
+     */
     public function addUser(User $user) {
-        $stmt = $this->db->prepare("
-            INSERT INTO users (nom, email, password, role, statut, fournisseur_id) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
+        $sql = "INSERT INTO users (nom, email, password, role, statut";
 
-        return $stmt->execute([
+        $params = [
             $user->getNom(),
             $user->getEmail(),
             $user->getPassword(),
             $user->getRole(),
-            $user->getStatut(),
-            $user->getFournisseurId()
-        ]);
+            $user->getStatut()
+        ];
+
+        // Ajouter fournisseur_id si le rôle est fournisseur
+        if ($user->getRole() === 'fournisseur') {
+            $sql .= ", fournisseur_id";
+            $params[] = $user->getFournisseurId();
+        }
+
+        $sql .= ") VALUES (" . implode(',', array_fill(0, count($params), '?')) . ")";
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
     }
 
     /**
      * Modifier un utilisateur (utilise un objet User)
      */
     public function updateUser(User $user) {
-        $stmt = $this->db->prepare("
-            UPDATE users 
-            SET nom = ?, email = ?, role = ?, statut = ?, fournisseur_id = ?
-            WHERE id = ?
-        ");
+        $sql = "UPDATE users 
+            SET nom = ?, email = ?, role = ?, statut = ?";
 
-        return $stmt->execute([
+        $params = [
             $user->getNom(),
             $user->getEmail(),
             $user->getRole(),
-            $user->getStatut(),
-            $user->getFournisseurId(),
-            $user->getId()
-        ]);
+            $user->getStatut()
+        ];
+
+        // Ajouter fournisseur_id si le rôle est fournisseur
+        if ($user->getRole() === 'fournisseur') {
+            $sql .= ", fournisseur_id = ?";
+            $params[] = $user->getFournisseurId();
+        }
+
+        $sql .= " WHERE id = ?";
+        $params[] = $user->getId();
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
     }
 
     /**

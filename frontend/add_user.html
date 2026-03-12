@@ -59,6 +59,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: opacity 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn-submit:hover {
             opacity: 0.9;
@@ -74,7 +76,6 @@
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            transition: opacity 0.3s;
         }
         .btn-cancel:hover {
             opacity: 0.9;
@@ -146,7 +147,7 @@
                 </div>
                 <?php endif; ?>
 
-                <form method="POST" action="add_user.php">
+                <form method="POST" action="../backend/add_user.php">
                     <div class="form-group">
                         <label for="nom">Nom complet *</label>
                         <input type="text" id="nom" name="nom" required
@@ -188,6 +189,20 @@
                         </div>
                     </div>
 
+                    <?php if (($_POST['role'] ?? 'vendeur') === 'fournisseur'): ?>
+                    <div class="form-group">
+                        <label for="fournisseur_id">Fournisseur associé</label>
+                        <select id="fournisseur_id" name="fournisseur_id">
+                            <option value="">-- Sélectionner un fournisseur --</option>
+                            <?php foreach ($fournisseurs as $fournisseur): ?>
+                            <option value="<?= $fournisseur->getId() ?>">
+                                <?= htmlspecialchars($fournisseur->getNom()) ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <?php endif; ?>
+
                     <div class="form-actions">
                         <button type="submit" class="btn-submit">
                             <i class="fas fa-save"></i> Ajouter
@@ -201,5 +216,19 @@
         </div>
     </main>
 </div>
+
+<script>
+    // Afficher le champ fournisseur uniquement si le rôle fournisseur est sélectionné
+    document.getElementById('role').addEventListener('change', function() {
+        let fournisseurGroup = document.querySelector('.form-group:has(#fournisseur_id)');
+        if (fournisseurGroup) {
+            if (this.value === 'fournisseur') {
+                fournisseurGroup.style.display = 'block';
+            } else {
+                fournisseurGroup.style.display = 'none';
+            }
+        }
+    });
+</script>
 </body>
 </html>

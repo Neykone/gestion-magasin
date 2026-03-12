@@ -12,7 +12,6 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'vendeur') {
 $userName = $_SESSION['user']['name'];
 $userId = $_SESSION['user']['id'];
 
-// Initialiser le modèle
 $venteModel = new VenteModel();
 
 // Récupérer uniquement les ventes du vendeur connecté
@@ -25,14 +24,13 @@ $ventesReussies = 0;
 $ventesAnnulees = 0;
 
 foreach ($ventes as $vente) {
-    if ($vente['statut'] === 'payé') {
-        $chiffreAffaires += $vente['total'];
+    if ($vente->isPaye()) {
+        $chiffreAffaires += $vente->getTotal();
         $ventesReussies++;
-    } elseif ($vente['statut'] === 'annulé') {
+    } elseif ($vente->isAnnule()) {
         $ventesAnnulees++;
     }
 }
 
-// Inclure la vue
 include '../frontend/historique.html';
 ?>

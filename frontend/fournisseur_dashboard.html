@@ -15,6 +15,9 @@
             <h1><i class="fas fa-truck"></i> Espace Fournisseur</h1>
             <span class="badge-fournisseur">
                 <i class="fas fa-user"></i> <?= htmlspecialchars($userName) ?>
+                <?php if (isset($fournisseurNom)): ?>
+                <small>(<?= htmlspecialchars($fournisseurNom) ?>)</small>
+                <?php endif; ?>
             </span>
         </div>
         <div class="header-right">
@@ -57,11 +60,18 @@
             </div>
         </div>
 
-        <!-- Message d'accueil -->
+        <!-- Message d'accueil ou d'alerte -->
+        <?php if (!empty($message)): ?>
+        <div class="welcome-message" style="background: <?= $messageType === 'warning' ? '#fff3cd' : '#e3f2fd' ?>; border-left-color: <?= $messageType === 'warning' ? '#ffc107' : '#1976d2' ?>;">
+            <i class="fas fa-info-circle" style="color: <?= $messageType === 'warning' ? '#856404' : '#1976d2' ?>;"></i>
+            <p><?= htmlspecialchars($message) ?></p>
+        </div>
+        <?php else: ?>
         <div class="welcome-message">
             <i class="fas fa-info-circle"></i>
             <p>Bienvenue dans votre espace fournisseur. Vous pouvez consulter l'état des stocks des produits que vous fournissez.</p>
         </div>
+        <?php endif; ?>
 
         <!-- Filtres et recherche -->
         <div class="filtres-section">
@@ -72,9 +82,17 @@
             <div class="filter-group">
                 <select id="filterCategorie" class="filter-select">
                     <option value="">Toutes catégories</option>
-                    <option value="Électronique">Électronique</option>
-                    <option value="Informatique">Informatique</option>
-                    <option value="Audio">Audio</option>
+                    <?php
+                    $categoriesUniques = [];
+                    foreach ($produitsData as $p) {
+                        if (!in_array($p['categorie'], $categoriesUniques) && !empty($p['categorie'])) {
+                            $categoriesUniques[] = $p['categorie'];
+                        }
+                    }
+                    sort($categoriesUniques);
+                    foreach ($categoriesUniques as $cat): ?>
+                    <option value="<?= htmlspecialchars($cat) ?>"><?= htmlspecialchars($cat) ?></option>
+                    <?php endforeach; ?>
                 </select>
                 <select id="filterStock" class="filter-select">
                     <option value="">Tous les stocks</option>
@@ -87,6 +105,12 @@
         <!-- Tableau des produits -->
         <div class="table-container">
             <h2>Mes produits en stock</h2>
+            <?php if (empty($produitsFournis)): ?>
+            <div style="text-align: center; padding: 50px; color: #666;">
+                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <p>Aucun produit trouvé pour votre fournisseur.</p>
+            </div>
+            <?php else: ?>
             <table id="produitsTable">
                 <thead>
                 <tr>
@@ -100,13 +124,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <!-- Dans la boucle foreach, remplacer les accès tableau par des méthodes -->
                 <?php foreach ($produitsFournis as $produit):
-    $stockClass = '';
-    $statutTexte = 'Normal';
-    $statutClass = 'badge-success';
+                    $stockClass = '';
+                    $statutTexte = 'Normal';
+                    $statutClass = 'badge-success';
 
-    if ($produit->isOutOfStock()) {
+                    if ($produit->isOutOfStock()) {
                 $stockClass = 'out-of-stock';
                 $statutTexte = 'Rupture';
                 $statutClass = 'badge-danger';
@@ -123,27 +146,35 @@
                     <td>
                         <span class="badge badge-info"><?= htmlspecialchars($produit->getCategorieNom() ?? 'Non catégorisé') ?></span>
                     </td>
-                    <td><?= htmlspecialchars($produit->getDescription()) ?></td>
+                    <td><?= htmlspecialchars($produit->getDescription() ?? '') ?></td>
                     <td><strong><?= number_format($produit->getPrixVente(), 2) ?> DH</strong></td>
                     <td>
                         <div class="stock-indicator">
-            <span class="badge <?= $statutClass ?>" style="font-size: 14px;">
-                <?= $produit->getStock() ?> unités
-            </span>
+                            <span class="badge <?= $statutClass ?>" style="font-size: 14px;">
+                                <?= $produit->getStock() ?> unités
+                            </span>
                         </div>
                     </td>
                     <td><?= $produit->getSeuilAlerte() ?> unités</td>
                     <td>
-        <span class="badge <?= $statutClass ?>">
-            <?= $statutTexte ?>
-        </span>
+                        <span class="badge <?= $statutClass ?>">
+                            <?= $statutTexte ?>
+                        </span>
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                </tbody>
+            </table>
+            <?php endif; ?>
+        </div>
 
-                <!-- Dans le graphique aussi -->
+        <!-- Graphique simple -->
+        <?php if (!empty($produitsFournis)): ?>
+        <div class="chart-container">
+            <h3>Répartition des stocks</h3>
+            <div class="progress-bars">
                 <?php foreach ($produitsFournis as $produit):
-    $pourcentage = min(100, ($produit->getStock() / 20) * 100);
+                    $pourcentage = min(100, ($produit->getStock() / 20) * 100);
                 $couleur = $produit->isLowStock() ? '#ff6b6b' : '#28a745';
                 ?>
                 <div class="progress-item">
@@ -156,36 +187,15 @@
                     </div>
                 </div>
                 <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Graphique simple -->
-        <div class="chart-container">
-            <h3>Répartition des stocks</h3>
-            <div class="progress-bars">
-                <?php foreach ($produitsFournis as $produit):
-                    $pourcentage = min(100, ($produit['stock'] / 20) * 100);
-                    $couleur = $produit['stock'] <= $produit['seuil_alerte'] ? '#ff6b6b' : '#28a745';
-                ?>
-                <div class="progress-item">
-                    <div class="progress-label">
-                        <span><?= htmlspecialchars($produit['nom']) ?></span>
-                        <span><?= $produit['stock'] ?> / 20</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: <?= $pourcentage ?>%; background: <?= $couleur ?>;"></div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 
 <script>
     // Recherche en temps réel
-    document.getElementById('searchProduit').addEventListener('keyup', function() {
+    document.getElementById('searchProduit')?.addEventListener('keyup', function() {
         let searchValue = this.value.toLowerCase();
         let rows = document.querySelectorAll('#produitsTable tbody tr');
 
@@ -195,8 +205,8 @@
         });
     });
 
-    // Filtre par catégorie - CORRIGÉ
-    document.getElementById('filterCategorie').addEventListener('change', function() {
+    // Filtre par catégorie
+    document.getElementById('filterCategorie')?.addEventListener('change', function() {
         let categorie = this.value;
         let rows = document.querySelectorAll('#produitsTable tbody tr');
 
@@ -204,23 +214,17 @@
             if (categorie === '') {
                 row.style.display = '';
             } else {
-                // Récupère la cellule catégorie (2ème colonne)
                 let categorieCell = row.querySelector('td:nth-child(2)');
                 if (categorieCell) {
                     let categorieText = categorieCell.textContent.trim();
-                    // Vérifie si le texte de la catégorie contient la valeur sélectionnée
-                    if (categorieText.includes(categorie)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                    row.style.display = categorieText.includes(categorie) ? '' : 'none';
                 }
             }
         });
     });
 
     // Filtre par état du stock
-    document.getElementById('filterStock').addEventListener('change', function() {
+    document.getElementById('filterStock')?.addEventListener('change', function() {
         let filter = this.value;
         let rows = document.querySelectorAll('#produitsTable tbody tr');
 

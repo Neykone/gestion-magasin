@@ -3,6 +3,7 @@
 session_start();
 require_once 'config/Database.php';
 require_once 'models/FournisseurModel.php';
+require_once 'models/entities/Fournisseur.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -27,7 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Le nom du fournisseur est obligatoire";
         $messageType = 'error';
     } else {
-        if ($fournisseurModel->addFournisseur($nom, $contact, $email, $telephone, $adresse)) {
+        $fournisseur = new Fournisseur([
+            'nom' => $nom,
+            'contact' => $contact,
+            'email' => $email,
+            'telephone' => $telephone,
+            'adresse' => $adresse
+        ]);
+
+        if ($fournisseurModel->addFournisseur($fournisseur)) {
             $message = "Fournisseur ajouté avec succès !";
             $messageType = 'success';
         } else {

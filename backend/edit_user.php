@@ -3,6 +3,7 @@
 session_start();
 require_once 'config/Database.php';
 require_once 'models/UserModel.php';
+require_once 'models/FournisseurModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -11,10 +12,9 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 $userName = $_SESSION['user']['name'];
 
-// Initialiser le modèle
 $userModel = new UserModel();
+$fournisseurModel = new FournisseurModel();
 
-// Récupérer l'ID de l'utilisateur à modifier
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id <= 0) {
@@ -22,7 +22,6 @@ if ($id <= 0) {
     exit();
 }
 
-// Récupérer l'utilisateur
 $user = $userModel->getUserById($id);
 
 if (!$user) {
@@ -30,18 +29,19 @@ if (!$user) {
     exit();
 }
 
+$fournisseurs = $fournisseurModel->getAllFournisseurs();
+
 $message = '';
 $messageType = '';
 
-// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'] ?? '';
     $email = $_POST['email'] ?? '';
     $role = $_POST['role'] ?? 'vendeur';
     $statut = $_POST['statut'] ?? 'actif';
+    $fournisseur_id = !empty($_POST['fournisseur_id']) ? intval($_POST['fournisseur_id']) : null;
     $newPassword = $_POST['new_password'] ?? '';
 
-    // Validation
     $errors = [];
 
     if (empty($nom)) {
@@ -54,32 +54,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "L'email n'est pas valide";
     }
 
-    // Vérifier si l'email existe déjà (pour un autre utilisateur)
     $existingUser = $userModel->getUserByEmail($email);
-    if ($existingUser && $existingUser['id'] != $id) {
+    if ($existingUser && $existingUser->getId() != $id) {
         $errors[] = "Cet email est déjà utilisé par un autre utilisateur";
     }
 
     if (empty($errors)) {
-        // Mise à jour des informations de base
-        if ($userModel->updateUser($id, $nom, $email, $role, $statut)) {
+        $user->setNom($nom)
+            ->setEmail($email)
+            ->setRole($role)
+            ->setStatut($statut)
+            ->setFournisseurId($fournisseur_id);
 
-            // Si un nouveau mot de passe est fourni, le mettre à jour
-            if (!empty($newPassword)) {
-                if (strlen($newPassword) >= 6) {
-                    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                    $userModel->changePassword($id, $hashedPassword);
-                    $message = "Utilisateur modifié avec succès (mot de passe changé) !";
-                } else {
-                    $message = "Utilisateur modifié mais le mot de passe doit faire 6 caractères minimum";
-                }
+        if ($userModel->updateUser($user)) {
+            if (!empty($newPassword) && strlen($newPassword) >= 6) {
+                $userModel->changePassword($id, $newPassword);
+                $message = "Utilisateur modifié avec succès (mot de passe changé) !";
             } else {
                 $message = "Utilisateur modifié avec succès !";
             }
             $messageType = 'success';
-
-            // Recharger l'utilisateur
-            $user = $userModel->getUserById($id);
         } else {
             $message = "Erreur lors de la modification";
             $messageType = 'error';

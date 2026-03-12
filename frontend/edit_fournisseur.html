@@ -38,7 +38,6 @@
             border: 2px solid #e1e1e1;
             border-radius: 5px;
             font-size: 16px;
-            transition: border-color 0.3s;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
@@ -58,10 +57,6 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.3s;
-        }
-        .btn-submit:hover {
-            opacity: 0.9;
         }
         .btn-cancel {
             background: #6c757d;
@@ -69,15 +64,8 @@
             padding: 15px 30px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            transition: opacity 0.3s;
-        }
-        .btn-cancel:hover {
-            opacity: 0.9;
         }
         .form-actions {
             display: flex;
@@ -121,9 +109,6 @@
             justify-content: space-between;
             align-items: center;
         }
-        .produits-liste li:last-child {
-            border-bottom: none;
-        }
         .badge-produit {
             background: #e2e3e5;
             color: #383d41;
@@ -164,7 +149,7 @@
             <div class="form-container">
                 <div class="form-title">
                     <i class="fas fa-edit"></i>
-                    Modifier : <?= htmlspecialchars($fournisseur['nom']) ?>
+                    Modifier : <?= htmlspecialchars($fournisseur->getNom()) ?>
                 </div>
 
                 <?php if (!empty($message)): ?>
@@ -177,43 +162,38 @@
                     <div class="form-group">
                         <label for="nom">Nom du fournisseur *</label>
                         <input type="text" id="nom" name="nom" required
-                               value="<?= htmlspecialchars($fournisseur['nom']) ?>"
-                               placeholder="Ex: Apple Distribution">
+                               value="<?= htmlspecialchars($fournisseur->getNom()) ?>">
                     </div>
 
                     <div class="form-group">
                         <label for="contact">Personne de contact</label>
                         <input type="text" id="contact" name="contact"
-                               value="<?= htmlspecialchars($fournisseur['contact'] ?? '') ?>"
-                               placeholder="Ex: Jean Dupont">
+                               value="<?= htmlspecialchars($fournisseur->getContact() ?? '') ?>">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" id="email" name="email"
-                                   value="<?= htmlspecialchars($fournisseur['email'] ?? '') ?>"
-                                   placeholder="contact@fournisseur.fr">
+                                   value="<?= htmlspecialchars($fournisseur->getEmail() ?? '') ?>">
                         </div>
                         <div class="form-group">
                             <label for="telephone">Téléphone</label>
                             <input type="tel" id="telephone" name="telephone"
-                                   value="<?= htmlspecialchars($fournisseur['telephone'] ?? '') ?>"
-                                   placeholder="01 23 45 67 89">
+                                   value="<?= htmlspecialchars($fournisseur->getTelephone() ?? '') ?>">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="adresse">Adresse</label>
-                        <textarea id="adresse" name="adresse" rows="3"
-                                  placeholder="Adresse complète..."><?= htmlspecialchars($fournisseur['adresse'] ?? '') ?></textarea>
+                        <textarea id="adresse" name="adresse" rows="3"><?= htmlspecialchars($fournisseur->getAdresse() ?? '') ?></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="statut">Statut</label>
                         <select id="statut" name="statut">
-                            <option value="actif" <?= ($fournisseur['statut'] ?? 'actif') === 'actif' ? 'selected' : '' ?>>Actif</option>
-                            <option value="inactif" <?= ($fournisseur['statut'] ?? '') === 'inactif' ? 'selected' : '' ?>>Inactif</option>
+                            <option value="actif" <?= $fournisseur->getStatut() === 'actif' ? 'selected' : '' ?>>Actif</option>
+                            <option value="inactif" <?= $fournisseur->getStatut() === 'inactif' ? 'selected' : '' ?>>Inactif</option>
                         </select>
                     </div>
 
@@ -234,10 +214,10 @@
                         <?php foreach ($produits as $produit): ?>
                         <li>
                             <span>
-                                <strong><?= htmlspecialchars($produit['nom']) ?></strong>
-                                <small style="color: #666; margin-left: 10px;">Stock: <?= $produit['stock'] ?></small>
+                                <strong><?= htmlspecialchars($produit->getNom()) ?></strong>
+                                <small style="color: #666;">Stock: <?= $produit->getStock() ?></small>
                             </span>
-                            <span class="badge-produit"><?= number_format($produit['prix_vente'], 2) ?> DH</span>
+                            <span class="badge-produit"><?= number_format($produit->getPrixVente(), 2) ?> DH</span>
                         </li>
                         <?php endforeach; ?>
                     </ul>

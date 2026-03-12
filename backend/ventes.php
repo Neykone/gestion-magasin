@@ -2,6 +2,7 @@
 // backend/ventes.php
 session_start();
 require_once 'models/VenteModel.php';
+require_once 'config/Database.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -11,6 +12,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 $userName = $_SESSION['user']['name'];
 
 $venteModel = new VenteModel();
+$db = Database::getInstance();
 
 $message = '';
 $messageType = '';
@@ -32,7 +34,7 @@ if (isset($_GET['annuler']) && is_numeric($_GET['annuler'])) {
     }
 }
 
-// Récupérer toutes les ventes avec détails (objets Vente)
+// Récupérer toutes les ventes avec détails
 $ventes = $venteModel->getVentesWithDetails();
 
 // Statistiques
@@ -53,10 +55,25 @@ foreach ($stats['par_statut'] as $statut) {
     if ($statut['statut'] === 'annulé') $ventesAnnulees = $statut['count'];
 }
 
-// Données pour le graphique
-$jours = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-$valeurs = [5200, 6800, 4300, 7900, 10200, 8500, 7200]; // À remplacer par des données réelles
-$maxValeur = max($valeurs);
+// Données pour le graphique (7 derniers jours)
+$jours = [];
+$valeurs = [];
+$joursLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+for ($i = 6; $i >= 0; $i--) {
+    $date = date('Y-m-d', strtotime("-$i days"));
+    $jourIndex = date('N', strtotime($date)) - 1; // 0 = Lundi
+    $jours[] = $joursLabels[$jourIndex];
+
+    $sqlJour = "SELECT SUM(total) as total FROM ventes 
+                WHERE statut = 'payé' AND DATE(date_vente) = ?";
+    $stmtJour = $db->prepare($sqlJour);
+    $stmtJour->execute([$date]);
+    $total = $stmtJour->fetch()['total'] ?? 0;
+    $valeurs[] = $total;
+}
+
+$maxValeur = max($valeurs) ?: 1;
 
 include '../frontend/ventes.html';
 ?>

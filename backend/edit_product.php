@@ -13,12 +13,10 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 $userName = $_SESSION['user']['name'];
 
-// Initialiser les modèles
 $productModel = new ProductModel();
 $categorieModel = new CategorieModel();
 $fournisseurModel = new FournisseurModel();
 
-// Récupérer l'ID du produit à modifier
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id <= 0) {
@@ -26,7 +24,6 @@ if ($id <= 0) {
     exit();
 }
 
-// Récupérer le produit
 $product = $productModel->getProductById($id);
 
 if (!$product) {
@@ -34,14 +31,12 @@ if (!$product) {
     exit();
 }
 
-// Récupérer les listes pour les selects
 $categories = $categorieModel->getAllCategories();
 $fournisseurs = $fournisseurModel->getAllFournisseurs();
 
 $message = '';
 $messageType = '';
 
-// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'] ?? '';
     $description = $_POST['description'] ?? '';
@@ -59,11 +54,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Le prix de vente doit être supérieur à 0";
         $messageType = 'error';
     } else {
-        if ($productModel->updateProduct($id, $nom, $description, $prix_achat, $prix_vente, $stock, $seuil_alerte, $categorie_id, $fournisseur_id)) {
+        $product->setNom($nom)
+            ->setDescription($description)
+            ->setPrixAchat($prix_achat)
+            ->setPrixVente($prix_vente)
+            ->setStock($stock)
+            ->setSeuilAlerte($seuil_alerte)
+            ->setCategorieId($categorie_id)
+            ->setFournisseurId($fournisseur_id);
+
+        if ($productModel->updateProduct($product)) {
             $message = "Produit modifié avec succès !";
             $messageType = 'success';
-            // Recharger le produit
-            $product = $productModel->getProductById($id);
         } else {
             $message = "Erreur lors de la modification";
             $messageType = 'error';

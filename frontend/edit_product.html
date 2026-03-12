@@ -87,12 +87,6 @@
       color: #721c24;
       border: 1px solid #f5c6cb;
     }
-    .current-image {
-      margin-top: 10px;
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 5px;
-    }
   </style>
 </head>
 <body>
@@ -126,7 +120,7 @@
       <div class="form-container">
         <div class="form-title">
           <i class="fas fa-edit"></i>
-          Modifier : <?= htmlspecialchars($product['nom']) ?>
+          Modifier : <?= htmlspecialchars($product->getNom()) ?>
         </div>
 
         <?php if (!empty($message)): ?>
@@ -135,28 +129,28 @@
         </div>
         <?php endif; ?>
 
-        <form method="POST" action="edit_product.php?id=<?= $id ?>">
+        <form method="POST" action="../backend/edit_product.php?id=<?= $id ?>">
           <div class="form-group">
             <label for="nom">Nom du produit *</label>
             <input type="text" id="nom" name="nom" required
-                   value="<?= htmlspecialchars($product['nom']) ?>">
+                   value="<?= htmlspecialchars($product->getNom()) ?>">
           </div>
 
           <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" rows="4"><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
+            <textarea id="description" name="description" rows="4"><?= htmlspecialchars($product->getDescription() ?? '') ?></textarea>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="prix_achat">Prix d'achat (DH)</label>
               <input type="number" id="prix_achat" name="prix_achat" step="0.01" min="0"
-                     value="<?= $product['prix_achat'] ?>">
+                     value="<?= $product->getPrixAchat() ?>">
             </div>
             <div class="form-group">
               <label for="prix_vente">Prix de vente (DH) *</label>
               <input type="number" id="prix_vente" name="prix_vente" step="0.01" min="0.01" required
-                     value="<?= $product['prix_vente'] ?>">
+                     value="<?= $product->getPrixVente() ?>">
             </div>
           </div>
 
@@ -164,12 +158,12 @@
             <div class="form-group">
               <label for="stock">Stock</label>
               <input type="number" id="stock" name="stock" min="0"
-                     value="<?= $product['stock'] ?>">
+                     value="<?= $product->getStock() ?>">
             </div>
             <div class="form-group">
               <label for="seuil_alerte">Seuil d'alerte</label>
               <input type="number" id="seuil_alerte" name="seuil_alerte" min="1"
-                     value="<?= $product['seuil_alerte'] ?>">
+                     value="<?= $product->getSeuilAlerte() ?>">
             </div>
           </div>
 
@@ -179,9 +173,9 @@
               <select id="categorie_id" name="categorie_id">
                 <option value="">-- Sélectionner une catégorie --</option>
                 <?php foreach ($categories as $cat): ?>
-                <option value="<?= $cat['id'] ?>"
-                <?= ($cat['id'] == ($product['categorie_id'] ?? 0)) ? 'selected' : '' ?>>
-                <?= htmlspecialchars($cat['nom']) ?>
+                <option value="<?= $cat->getId() ?>"
+                <?= ($cat->getId() == $product->getCategorieId()) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($cat->getNom()) ?>
                 </option>
                 <?php endforeach; ?>
               </select>
@@ -191,9 +185,9 @@
               <select id="fournisseur_id" name="fournisseur_id">
                 <option value="">-- Sélectionner un fournisseur --</option>
                 <?php foreach ($fournisseurs as $four): ?>
-                <option value="<?= $four['id'] ?>"
-                <?= ($four['id'] == ($product['fournisseur_id'] ?? 0)) ? 'selected' : '' ?>>
-                <?= htmlspecialchars($four['nom']) ?>
+                <option value="<?= $four->getId() ?>"
+                <?= ($four->getId() == $product->getFournisseurId()) ? 'selected' : '' ?>>
+                <?= htmlspecialchars($four->getNom()) ?>
                 </option>
                 <?php endforeach; ?>
               </select>

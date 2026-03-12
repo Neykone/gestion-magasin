@@ -1,6 +1,7 @@
 <?php
 // backend/edit_categorie.php
 session_start();
+require_once 'config/Database.php';
 require_once 'models/CategorieModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
@@ -9,6 +10,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 }
 
 $userName = $_SESSION['user']['name'];
+
 $categorieModel = new CategorieModel();
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

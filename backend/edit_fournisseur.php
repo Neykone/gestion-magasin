@@ -1,6 +1,7 @@
 <?php
 // backend/edit_fournisseur.php
 session_start();
+require_once 'config/Database.php';
 require_once 'models/FournisseurModel.php';
 require_once 'models/ProductModel.php';
 
@@ -28,7 +29,6 @@ if (!$fournisseur) {
     exit();
 }
 
-// Récupérer les produits de ce fournisseur
 $produits = $productModel->getProductsBySupplier($id);
 
 $message = '';
