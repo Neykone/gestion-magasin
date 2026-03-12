@@ -1,7 +1,6 @@
 <?php
 // backend/categories.php
 session_start();
-require_once 'config/Database.php';
 require_once 'models/CategorieModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
@@ -10,15 +9,11 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 }
 
 $userName = $_SESSION['user']['name'];
-
-// Initialiser le modèle
 $categorieModel = new CategorieModel();
 
-// Gestion des actions
 $message = '';
 $messageType = '';
 
-// Suppression d'une catégorie
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $deleteId = (int)$_GET['delete'];
 
@@ -31,12 +26,20 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     }
 }
 
-// Récupérer toutes les catégories
-$categories = $categorieModel->getAllCategories();
+// Récupérer toutes les catégories avec le nombre de produits
+$categories = $categorieModel->getAllCategoriesWithCount();
 
 // Statistiques
 $totalCategories = count($categories);
-$categoriesActives = count(array_filter($categories, fn($c) => ($c['statut'] ?? 'actif') === 'actif'));
+$categoriesActives = 0;
+$totalProduitsCategories = 0;
+
+foreach ($categories as $categorie) {
+    if ($categorie->isActif()) {
+        $categoriesActives++;
+    }
+    $totalProduitsCategories += $categorie->getNbProduits();
+}
 
 include '../frontend/categories.html';
 ?>

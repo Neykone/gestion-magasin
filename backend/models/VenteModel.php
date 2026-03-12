@@ -1,13 +1,17 @@
 <?php
 // models/VenteModel.php
 require_once 'config/Database.php';
+require_once 'models/entities/Vente.php';
+require_once 'models/ProductModel.php';
 
 class VenteModel {
 
     private $db;
+    private $productModel;
 
     public function __construct() {
         $this->db = Database::getInstance();
+        $this->productModel = new ProductModel();
     }
 
     /**
@@ -20,7 +24,13 @@ class VenteModel {
                 ORDER BY v.date_vente DESC";
 
         $stmt = $this->db->query($sql);
-        return $stmt->fetchAll();
+        $data = $stmt->fetchAll();
+
+        $ventes = [];
+        foreach ($data as $row) {
+            $ventes[] = new Vente($row);
+        }
+        return $ventes;
     }
 
     /**
@@ -34,7 +44,12 @@ class VenteModel {
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$id]);
-        return $stmt->fetch();
+        $data = $stmt->fetch();
+
+        if ($data) {
+            return new Vente($data);
+        }
+        return null;
     }
 
     /**
@@ -49,7 +64,13 @@ class VenteModel {
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
-        return $stmt->fetchAll();
+        $data = $stmt->fetchAll();
+
+        $ventes = [];
+        foreach ($data as $row) {
+            $ventes[] = new Vente($row);
+        }
+        return $ventes;
     }
 
     /**
@@ -69,32 +90,26 @@ class VenteModel {
         $results = $stmt->fetchAll();
 
         // Organiser les résultats par vente
-        $ventes = [];
+        $ventesArray = [];
         foreach ($results as $row) {
             $venteId = $row['id'];
-            if (!isset($ventes[$venteId])) {
-                $ventes[$venteId] = [
-                    'id' => $row['id'],
-                    'date_vente' => $row['date_vente'],
-                    'client_nom' => $row['client_nom'],
-                    'total' => $row['total'],
-                    'statut' => $row['statut'],
-                    'paiement' => $row['paiement'],
-                    'vendeur_nom' => $row['vendeur_nom'],
-                    'produits' => []
-                ];
+            if (!isset($ventesArray[$venteId])) {
+                $vente = new Vente($row);
+                $ventesArray[$venteId] = $vente;
             }
+
             if ($row['produit_id']) {
-                $ventes[$venteId]['produits'][] = [
+                $produit = [
                     'produit_id' => $row['produit_id'],
                     'produit_nom' => $row['produit_nom'],
                     'quantite' => $row['quantite'],
                     'prix_unitaire' => $row['prix_unitaire']
                 ];
+                $ventesArray[$venteId]->addProduit($produit);
             }
         }
 
-        return array_values($ventes);
+        return array_values($ventesArray);
     }
 
     /**
@@ -126,9 +141,7 @@ class VenteModel {
                 ]);
 
                 // Mettre à jour le stock
-                $sqlStock = "UPDATE produits SET stock = stock - ? WHERE id = ?";
-                $stmtStock = $this->db->prepare($sqlStock);
-                $stmtStock->execute([$produit['quantite'], $produit['id']]);
+                $this->productModel->updateStock($produit['id'], $produit['quantite']);
             }
 
             $this->db->commit();
@@ -155,9 +168,13 @@ class VenteModel {
 
             // Remettre en stock
             foreach ($details as $detail) {
-                $sqlStock = "UPDATE produits SET stock = stock + ? WHERE id = ?";
-                $stmtStock = $this->db->prepare($sqlStock);
-                $stmtStock->execute([$detail['quantite'], $detail['produit_id']]);
+                $product = $this->productModel->getProductById($detail['produit_id']);
+                if ($product) {
+                    // On ne peut pas utiliser updateStock car elle soustrait, donc requête directe
+                    $sqlStock = "UPDATE produits SET stock = stock + ? WHERE id = ?";
+                    $stmtStock = $this->db->prepare($sqlStock);
+                    $stmtStock->execute([$detail['quantite'], $detail['produit_id']]);
+                }
             }
 
             // Mettre à jour le statut de la vente
@@ -195,7 +212,7 @@ class VenteModel {
         // Ventes du jour
         $stmt = $this->db->query("SELECT COUNT(*) as total, SUM(total) as ca FROM ventes WHERE DATE(date_vente) = CURDATE()");
         $row = $stmt->fetch();
-        $stats['ventes_aujourdhui'] = $row['total'];
+        $stats['ventes_aujourdhui'] = $row['total'] ?? 0;
         $stats['ca_aujourdhui'] = $row['ca'] ?? 0;
 
         return $stats;

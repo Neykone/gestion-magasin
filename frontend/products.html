@@ -116,69 +116,61 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <!-- Dans la boucle foreach, remplacer les accès tableau par des appels de méthodes -->
                     <?php foreach ($products as $product):
-                                $marge = $product['prix_vente'] - $product['prix_achat'];
-                                $margePercentage = ($marge / $product['prix_vente']) * 100;
-
-                                $stockClass = '';
-                                if ($product['stock'] == 0) {
-                                    $stockClass = 'out-of-stock';
-                                } elseif ($product['stock'] <= $product['seuil_alerte']) {
-                                    $stockClass = 'low-stock';
-                                }
-                            ?>
+    $stockClass = '';
+    if ($product->isOutOfStock()) {
+                    $stockClass = 'out-of-stock';
+                    } elseif ($product->isLowStock()) {
+                    $stockClass = 'low-stock';
+                    }
+                    ?>
                     <tr class="<?= $stockClass ?>">
-                        <td>#<?= $product['id'] ?></td>
+                        <td>#<?= $product->getId() ?></td>
                         <td>
-                            <div style="font-weight: bold;"><?= htmlspecialchars($product['nom']) ?></div>
-                            <small style="color: #666;"><?= htmlspecialchars($product['description']) ?></small>
+                            <div style="font-weight: bold;"><?= htmlspecialchars($product->getNom()) ?></div>
+                            <small style="color: #666;"><?= htmlspecialchars($product->getDescription()) ?></small>
                         </td>
                         <td>
-                            <span class="badge badge-info"><?= htmlspecialchars($product['categorie_nom'] ?? 'Non catégorisé') ?></span>
+                            <span class="badge badge-info"><?= htmlspecialchars($product->getCategorieNom() ?? 'Non catégorisé') ?></span>
                         </td>
-                        <td><?= number_format($product['prix_achat'], 2) ?> DH</td>
-                        <td><strong><?= number_format($product['prix_vente'], 2) ?> DH</strong></td>
+                        <td><?= number_format($product->getPrixAchat(), 2) ?> DH</td>
+                        <td><strong><?= number_format($product->getPrixVente(), 2) ?> DH</strong></td>
                         <td>
-                            <?php
-                                    $color = $margePercentage;
-                            ?>
-                            <span>
-                                        <?= number_format($marge, 2) ?> DH (<?= number_format($margePercentage, 1) ?>%)
-                                    </span>
+                            <?php $marge = $product->getMarge(); ?>
+                            <?php $margePercentage = $product->getMargePourcentage(); ?>
+                            <span style="color: <?= $margePercentage > 20 ? '#28a745' : '#ff6b6b' ?>;">
+            <?= number_format($marge, 2) ?> DH (<?= number_format($margePercentage, 1) ?>%)
+        </span>
                         </td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <?php
-                                        $badgeClass = 'badge-success';
-                                        if ($product['stock'] == 0) {
-                                            $badgeClass = 'badge-danger';
-                                        } elseif ($product['stock'] <= $product['seuil_alerte']) {
-                                            $badgeClass = 'badge-warning';
-                                        }
-                                        ?>
+            $badgeClass = 'badge-success';
+            if ($product->isOutOfStock()) {
+                                $badgeClass = 'badge-danger';
+                                } elseif ($product->isLowStock()) {
+                                $badgeClass = 'badge-warning';
+                                }
+                                ?>
                                 <span class="badge <?= $badgeClass ?>">
-                                            <?= $product['stock'] ?> unités
-                                        </span>
-                                <?php if ($product['stock'] <= $product['seuil_alerte']): ?>
+                <?= $product->getStock() ?> unités
+            </span>
+                                <?php if ($product->isLowStock()): ?>
                                 <i class="fas fa-exclamation-triangle" style="color: #ff6b6b;" title="Stock bas"></i>
                                 <?php endif; ?>
                             </div>
                         </td>
-                        <td><?= htmlspecialchars($product['fournisseur_nom'] ?? 'Non spécifié') ?></td>
+                        <td><?= htmlspecialchars($product->getFournisseurNom() ?? 'Non spécifié') ?></td>
                         <td>
-                            <?php
-                            $productName=$product['nom'];
-                            ?>
                             <div class="actions">
-                                <a href="../backend/edit_product.php?id=<?= $product['id'] ?>" class="btn-edit" title="Modifier">
+                                <a href="edit_product.php?id=<?= $product->getId() ?>" class="btn-edit" title="Modifier">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="?delete=<?= $product['id'] ?>"
+                                <a href="?delete=<?= $product->getId() ?>"
                                    class="btn-delete"
                                    title="Supprimer"
-                                onclick="return confirm('Supprimer <?= $productName ?>');"/>
-
-
+                                   onclick="return confirm('Supprimer <?= htmlspecialchars($product->getNom()) ?> ?');">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>

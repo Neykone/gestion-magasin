@@ -100,36 +100,32 @@
                     <tbody>
                     <?php foreach ($categories as $categorie): ?>
                     <tr>
-                        <td>#<?= $categorie['id'] ?></td>
+                        <td>#<?= $categorie->getId() ?></td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <div style="width: 30px; height: 30px; background: #667eea; border-radius: 5px; display: flex; align-items: center; justify-content: center; color: white;">
                                     <i class="fas fa-tag"></i>
                                 </div>
-                                <strong><?= htmlspecialchars($categorie['nom']) ?></strong>
+                                <strong><?= htmlspecialchars($categorie->getNom()) ?></strong>
                             </div>
                         </td>
-                        <td><?= htmlspecialchars($categorie['description'] ?? '') ?></td>
+                        <td><?= htmlspecialchars($categorie->getDescription() ?? '') ?></td>
                         <td>
-                            <span class="badge badge-info"><?= isset($categorie['nb_produits']) ? $categorie['nb_produits'] : '0' ?> produits</span>
+                            <span class="badge badge-info"><?= $categorie->getNbProduits() ?> produits</span>
                         </td>
                         <td>
-                                <span class="badge <?= $categorie['statut'] === 'actif' ? 'badge-success' : 'badge-warning' ?>">
-                                    <?= ucfirst($categorie['statut']) ?>
-                                </span>
+        <span class="badge <?= $categorie->isActif() ? 'badge-success' : 'badge-warning' ?>">
+            <?= $categorie->isActif() ? 'Actif' : 'Inactif' ?>
+        </span>
                         </td>
                         <td>
-                            <?php
-                            $catName=$categorie['nom'];
-                            ?>
                             <div class="actions">
-                                <a href="../backend/edit_categorie.php?id=<?= $categorie['id'] ?>" class="btn-edit" title="Modifier">
+                                <a href="edit_categorie.php?id=<?= $categorie->getId() ?>" class="btn-edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="?delete=<?= $categorie['id'] ?>"
+                                <a href="?delete=<?= $categorie->getId() ?>"
                                    class="btn-delete"
-                                   title="Supprimer"
-                                   onclick="return confirm('Supprimer <?= $catName ?>');"/>
+                                   onclick="return confirm('Supprimer la catégorie <?= htmlspecialchars($categorie->getNom()) ?> ?');">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>
@@ -140,30 +136,23 @@
                 </table>
             </div>
 
+            <!-- Statistiques rapides -->
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px;">
                 <?php
-                $totalCategories = count($categories);
-                $categoriesActives = 0;
-                $totalProduitsCategories = 0;
-
-                foreach ($categories as $categorie) {
-                    if ($categorie['statut'] === 'actif') {
-                        $categoriesActives++;
-                    }
-                    $totalProduitsCategories += isset($cat['nb_produits']) ? $cat['nb_produits'] : 0;
-                }
-                ?>
-                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Total Catégories</div>
-                    <div style="font-size: 32px; font-weight: bold; color: #667eea;"><?= $totalCategories ?></div>
+    // Ces variables sont déjà calculées dans categories.php
+    // $totalCategories, $categoriesActives, $totalProduitsCategories
+    ?>
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                    <div style="font-size: 32px; color: #667eea; margin-bottom: 10px;"><?= $totalCategories ?></div>
+                    <div style="color: #666;">Total Catégories</div>
                 </div>
-                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Catégories Actives</div>
-                    <div style="font-size: 32px; font-weight: bold; color: #28a745;"><?= $categoriesActives ?></div>
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                    <div style="font-size: 32px; color: #28a745; margin-bottom: 10px;"><?= $categoriesActives ?></div>
+                    <div style="color: #666;">Catégories Actives</div>
                 </div>
-                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <div style="font-size: 14px; color: #666; margin-bottom: 5px;">Produits dans catégories</div>
-                    <div style="font-size: 32px; font-weight: bold; color: #17a2b8;"><?= $totalProduitsCategories ?></div>
+                <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;">
+                    <div style="font-size: 32px; color: #17a2b8; margin-bottom: 10px;"><?= $totalProduitsCategories ?></div>
+                    <div style="color: #666;">Produits dans catégories</div>
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 <?php
 // models/CategorieModel.php
 require_once 'config/Database.php';
+require_once 'models/entities/Categorie.php';
 
 class CategorieModel {
 
@@ -15,7 +16,13 @@ class CategorieModel {
      */
     public function getAllCategories() {
         $stmt = $this->db->query("SELECT * FROM categories ORDER BY nom ASC");
-        return $stmt->fetchAll();
+        $data = $stmt->fetchAll();
+
+        $categories = [];
+        foreach ($data as $row) {
+            $categories[] = new Categorie($row);
+        }
+        return $categories;
     }
 
     /**
@@ -24,49 +31,72 @@ class CategorieModel {
     public function getCategorieById($id) {
         $stmt = $this->db->prepare("SELECT * FROM categories WHERE id = ?");
         $stmt->execute([$id]);
-        return $stmt->fetch();
+        $data = $stmt->fetch();
+
+        if ($data) {
+            return new Categorie($data);
+        }
+        return null;
+    }
+
+    /**
+     * Récupérer toutes les catégories avec le nombre de produits
+     */
+    public function getAllCategoriesWithCount() {
+        $sql = "SELECT c.*, COUNT(p.id) as nb_produits 
+                FROM categories c
+                LEFT JOIN produits p ON c.id = p.categorie_id
+                GROUP BY c.id
+                ORDER BY c.nom ASC";
+
+        $stmt = $this->db->query($sql);
+        $data = $stmt->fetchAll();
+
+        $categories = [];
+        foreach ($data as $row) {
+            $categories[] = new Categorie($row);
+        }
+        return $categories;
     }
 
     /**
      * Ajouter une catégorie
      */
-    public function addCategorie($nom, $description) {
+    public function addCategorie(Categorie $categorie) {
         $stmt = $this->db->prepare("INSERT INTO categories (nom, description) VALUES (?, ?)");
-        return $stmt->execute([$nom, $description]);
+        return $stmt->execute([
+            $categorie->getNom(),
+            $categorie->getDescription()
+        ]);
     }
 
     /**
      * Modifier une catégorie
      */
-    public function updateCategorie($id, $nom, $description, $statut) {
+    public function updateCategorie(Categorie $categorie) {
         $stmt = $this->db->prepare("UPDATE categories SET nom = ?, description = ?, statut = ? WHERE id = ?");
-        return $stmt->execute([$nom, $description, $statut, $id]);
+        return $stmt->execute([
+            $categorie->getNom(),
+            $categorie->getDescription(),
+            $categorie->getStatut(),
+            $categorie->getId()
+        ]);
     }
 
     /**
      * Supprimer une catégorie
      */
     public function deleteCategorie($id) {
-        // Vérifier si des produits utilisent cette catégorie
         $checkStmt = $this->db->prepare("SELECT COUNT(*) as count FROM produits WHERE categorie_id = ?");
         $checkStmt->execute([$id]);
         $result = $checkStmt->fetch();
 
         if ($result['count'] > 0) {
-            return false; // Catégorie utilisée
+            return false;
         }
 
         $stmt = $this->db->prepare("DELETE FROM categories WHERE id = ?");
         return $stmt->execute([$id]);
-    }
-
-    /**
-     * Compter le nombre de catégories
-     */
-    public function countCategories() {
-        $stmt = $this->db->query("SELECT COUNT(*) as total FROM categories");
-        $result = $stmt->fetch();
-        return $result['total'];
     }
 }
 ?>

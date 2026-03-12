@@ -1,6 +1,7 @@
 <?php
 // models/UserModel.php
 require_once 'config/Database.php';
+require_once 'models/entities/User.php';
 
 class UserModel {
 
@@ -11,67 +12,96 @@ class UserModel {
     }
 
     /**
-     * Récupérer un utilisateur par son email
+     * Récupérer un utilisateur par son email (retourne un objet User)
      */
     public function getUserByEmail($email) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
-        return $stmt->fetch();
+        $data = $stmt->fetch();
+
+        if ($data) {
+            return new User($data);
+        }
+        return null;
     }
 
     /**
-     * Récupérer un utilisateur par son ID
+     * Récupérer un utilisateur par son ID (retourne un objet User)
      */
     public function getUserById($id) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$id]);
-        return $stmt->fetch();
+        $data = $stmt->fetch();
+
+        if ($data) {
+            return new User($data);
+        }
+        return null;
     }
 
     /**
-     * Récupérer tous les utilisateurs
+     * Récupérer tous les utilisateurs (retourne un tableau d'objets User)
      */
     public function getAllUsers() {
         $stmt = $this->db->query("SELECT * FROM users ORDER BY id DESC");
-        return $stmt->fetchAll();
+        $data = $stmt->fetchAll();
+
+        $users = [];
+        foreach ($data as $row) {
+            $users[] = new User($row);
+        }
+        return $users;
     }
 
     /**
-     * Vérifier le mot de passe (pour la connexion)
+     * Vérifier le mot de passe (utilise la méthode de l'entité)
      */
     public function verifyPassword($email, $password) {
         $user = $this->getUserByEmail($email);
 
-        if ($user) {
-            // Pour l'instant, on compare en clair (à changer plus tard avec password_verify)
-            if ($password === $user['password']) {
-                return $user;
-            }
+        if ($user && $user->verifyPassword($password)) {
+            return $user;
         }
         return false;
     }
 
     /**
-     * Ajouter un nouvel utilisateur
+     * Ajouter un nouvel utilisateur (utilise un objet User)
      */
-    public function addUser($nom, $email, $password, $role) {
+    public function addUser(User $user) {
         $stmt = $this->db->prepare("
-            INSERT INTO users (nom, email, password, role) 
-            VALUES (?, ?, ?, ?)
+            INSERT INTO users (nom, email, password, role, statut, fournisseur_id) 
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
-        return $stmt->execute([$nom, $email, $password, $role]);
+
+        return $stmt->execute([
+            $user->getNom(),
+            $user->getEmail(),
+            $user->getPassword(),
+            $user->getRole(),
+            $user->getStatut(),
+            $user->getFournisseurId()
+        ]);
     }
 
     /**
-     * Modifier un utilisateur
+     * Modifier un utilisateur (utilise un objet User)
      */
-    public function updateUser($id, $nom, $email, $role, $statut) {
+    public function updateUser(User $user) {
         $stmt = $this->db->prepare("
             UPDATE users 
-            SET nom = ?, email = ?, role = ?, statut = ? 
+            SET nom = ?, email = ?, role = ?, statut = ?, fournisseur_id = ?
             WHERE id = ?
         ");
-        return $stmt->execute([$nom, $email, $role, $statut, $id]);
+
+        return $stmt->execute([
+            $user->getNom(),
+            $user->getEmail(),
+            $user->getRole(),
+            $user->getStatut(),
+            $user->getFournisseurId(),
+            $user->getId()
+        ]);
     }
 
     /**
@@ -83,12 +113,16 @@ class UserModel {
     }
 
     /**
-     * Changer le mot de passe (avec hash)
+     * Changer le mot de passe (utilise la méthode de l'entité)
      */
     public function changePassword($id, $newPassword) {
-        // Plus tard on ajoutera password_hash()
-        $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE id = ?");
-        return $stmt->execute([$newPassword, $id]);
+        $user = $this->getUserById($id);
+        if ($user) {
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+            $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE id = ?");
+            return $stmt->execute([$hashedPassword, $id]);
+        }
+        return false;
     }
 
     /**
@@ -106,7 +140,13 @@ class UserModel {
     public function getUsersByRole($role) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE role = ?");
         $stmt->execute([$role]);
-        return $stmt->fetchAll();
+        $data = $stmt->fetchAll();
+
+        $users = [];
+        foreach ($data as $row) {
+            $users[] = new User($row);
+        }
+        return $users;
     }
 }
 ?>

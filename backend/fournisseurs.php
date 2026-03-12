@@ -1,7 +1,6 @@
 <?php
 // backend/fournisseurs.php
 session_start();
-require_once 'config/Database.php';
 require_once 'models/FournisseurModel.php';
 require_once 'models/ProductModel.php';
 
@@ -12,15 +11,12 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 $userName = $_SESSION['user']['name'];
 
-// Initialiser les modèles
 $fournisseurModel = new FournisseurModel();
 $productModel = new ProductModel();
 
-// Gestion des actions
 $message = '';
 $messageType = '';
 
-// Suppression d'un fournisseur
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $deleteId = (int)$_GET['delete'];
 
@@ -37,17 +33,22 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
 $fournisseurs = $fournisseurModel->getAllFournisseurs();
 
 // Ajouter le nombre de produits pour chaque fournisseur
-foreach ($fournisseurs as &$fournisseur) {
-    $produits = $productModel->getProductsBySupplier($fournisseur['id']);
-    $fournisseur['produits_fournis'] = count($produits);
+foreach ($fournisseurs as $fournisseur) {
+    $produits = $productModel->getProductsBySupplier($fournisseur->getId());
+    $fournisseur->setNbProduits(count($produits));
 }
 
 // Statistiques
 $totalFournisseurs = count($fournisseurs);
-$fournisseursActifs = count(array_filter($fournisseurs, function ($f) {
-    return ($f['statut'] ?? 'actif') === 'actif';
-}));
-$totalProduitsFournis = array_sum(array_column($fournisseurs, 'produits_fournis'));
+$fournisseursActifs = 0;
+$totalProduitsFournis = 0;
+
+foreach ($fournisseurs as $fournisseur) {
+    if ($fournisseur->isActif()) {
+        $fournisseursActifs++;
+    }
+    $totalProduitsFournis += $fournisseur->getNbProduits();
+}
 
 include '../frontend/fournisseurs.html';
 ?>

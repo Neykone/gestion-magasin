@@ -105,52 +105,53 @@
                     <tbody>
                     <?php foreach ($users as $user): ?>
                     <tr>
-                        <td>#<?= $user['id'] ?></td>
+                        <td>#<?= $user->getId() ?></td>
                         <td>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <img src="https://ui-avatars.com/api/?name=<?= urlencode($user['nom']) ?>&background=667eea&color=fff&size=32"
-                                     style="width: 32px; height: 32px; border-radius: 50%;">
-                                <?= htmlspecialchars($user['nom']) ?>
+                                <img src="https://ui-avatars.com/api/?name=<?= urlencode($user->getNom()) ?>&background=667eea&color=fff&size=32"
+                                     style="width: 32px; height: 32px; border-radius: 50%;"
+                                     alt="Avatar">
+                                <?= htmlspecialchars($user->getNom()) ?>
                             </div>
                         </td>
-                        <td><?= htmlspecialchars($user['email']) ?></td>
+                        <td><?= htmlspecialchars($user->getEmail()) ?></td>
                         <td>
                             <?php
-                                    if ($user['role'] === 'admin') {
-                                        $badgeClass = 'badge-danger';
-                                        $roleText = 'Admin';
-                                    } elseif ($user['role'] === 'vendeur') {
-                                        $badgeClass = 'badge-success';
-                                        $roleText = 'Vendeur';
-                                    } else {
-                                        $badgeClass = 'badge-info';
-                                        $roleText = 'Fournisseur';
-                                    }
-                                    ?>
-                            <span class="badge <?= $badgeClass ?>">
-                                        <?= $roleText ?>
-                                    </span>
+        $badgeClass = '';
+        $roleText = '';
+        if ($user->isAdmin()) {
+                            $badgeClass = 'badge-danger';
+                            $roleText = 'Admin';
+                            } elseif ($user->isVendeur()) {
+                            $badgeClass = 'badge-success';
+                            $roleText = 'Vendeur';
+                            } else {
+                            $badgeClass = 'badge-info';
+                            $roleText = 'Fournisseur';
+                            }
+                            ?>
+                            <span class="badge <?= $badgeClass ?>"><?= $roleText ?></span>
                         </td>
                         <td>
-                                    <span class="badge <?= $user['statut'] === 'actif' ? 'badge-success' : 'badge-warning' ?>">
-                                        <?= ucfirst($user['statut']) ?>
-                                    </span>
+        <span class="badge <?= $user->isActif() ? 'badge-success' : 'badge-warning' ?>">
+            <?= $user->isActif() ? 'Actif' : 'Inactif' ?>
+        </span>
                         </td>
                         <td>
                             <div class="actions">
-                                <a href="../backend/edit_user.php?id=<?= $user['id'] ?>" class="btn-edit" title="Modifier">
+                                <a href="edit_user.php?id=<?= $user->getId() ?>" class="btn-edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="?delete=<?= $user['id'] ?>"
+                                <a href="?delete=<?= $user->getId() ?>"
                                    class="btn-delete"
-                                   title="Supprimer"
-                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
+                                   onclick="return confirm('Supprimer <?= htmlspecialchars($user->getNom()) ?> ?');">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
+
                     </tbody>
                 </table>
             </div>

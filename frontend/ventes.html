@@ -159,21 +159,22 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <!-- Dans la boucle foreach -->
                     <?php foreach ($ventes as $vente): ?>
-                    <tr class="<?= $vente['statut'] === 'annulé' ? 'row-annulee' : '' ?>">
-                        <td><strong>#<?= $vente['id'] ?></strong></td>
+                    <tr class="<?= $vente->isAnnule() ? 'row-annulee' : '' ?>">
+                        <td><strong>#<?= $vente->getId() ?></strong></td>
                         <td>
                             <i class="fas fa-calendar" style="color: #667eea;"></i>
-                            <?= date('d/m/Y H:i', strtotime($vente['date_vente'])) ?>
+                            <?= date('d/m/Y H:i', strtotime($vente->getDateVente())) ?>
                         </td>
-                        <td><?= htmlspecialchars($vente['client_nom'] ?? 'Client inconnu') ?></td>
-                        <td><?= htmlspecialchars($vente['vendeur_nom'] ?? 'Inconnu') ?></td>
+                        <td><?= htmlspecialchars($vente->getClientNom() ?? 'Client inconnu') ?></td>
+                        <td><?= htmlspecialchars($vente->getVendeurNom() ?? 'Inconnu') ?></td>
                         <td>
-                            <button class="btn-details" onclick="toggleDetails(<?= $vente['id'] ?>)">
-                                <i class="fas fa-eye"></i> <?= count($vente['produits']) ?> produit(s)
+                            <button class="btn-details" onclick="toggleDetails(<?= $vente->getId() ?>)">
+                                <i class="fas fa-eye"></i> <?= count($vente->getProduits()) ?> produit(s)
                             </button>
-                            <div id="details-<?= $vente['id'] ?>" class="vente-details" style="display: none;">
-                                <?php foreach ($vente['produits'] as $produit): ?>
+                            <div id="details-<?= $vente->getId() ?>" class="vente-details" style="display: none;">
+                                <?php foreach ($vente->getProduits() as $produit): ?>
                                 <div class="produit-ligne">
                                     <span><?= htmlspecialchars($produit['produit_nom']) ?></span>
                                     <span>x<?= $produit['quantite'] ?></span>
@@ -182,33 +183,28 @@
                                 <?php endforeach; ?>
                             </div>
                         </td>
-                        <td><strong><?= number_format($vente['total'], 2) ?> DH</strong></td>
+                        <td><strong><?= number_format($vente->getTotal(), 2) ?> DH</strong></td>
                         <td>
-        <span class="badge <?= $vente['statut'] === 'payé' ? 'badge-success' : ($vente['statut'] === 'en attente' ? 'badge-warning' : 'badge-danger') ?>">
-            <?= ucfirst($vente['statut']) ?>
+        <span class="badge <?= $vente->isPaye() ? 'badge-success' : ($vente->isEnAttente() ? 'badge-warning' : 'badge-danger') ?>">
+            <?= ucfirst($vente->getStatut()) ?>
         </span>
                         </td>
                         <td>
         <span class="badge badge-paiement">
-            <?php
-            $iconePaiement = 'fa-credit-card';
-            if ($vente['paiement'] === 'espèces') $iconePaiement = 'fa-money-bill';
-            if ($vente['paiement'] === 'virement') $iconePaiement = 'fa-university';
-            ?>
-            <i class="fas <?= $iconePaiement ?>"></i>
-            <?= ucfirst($vente['paiement']) ?>
+            <i class="fas <?= $vente->getIconePaiement() ?>"></i>
+            <?= ucfirst($vente->getPaiement()) ?>
         </span>
                         </td>
                         <td>
                             <div class="actions">
-                                <a href="#" class="btn-edit" title="Voir facture" onclick="imprimerTicket(<?= $vente['id'] ?>)">
+                                <a href="#" class="btn-edit" title="Voir facture" onclick="imprimerTicket(<?= $vente->getId() ?>)">
                                     <i class="fas fa-print"></i>
                                 </a>
-                                <?php if ($vente['statut'] !== 'annulé'): ?>
-                                <a href="?annuler=<?= $vente['id'] ?>"
+                                <?php if (!$vente->isAnnule()): ?>
+                                <a href="?annuler=<?= $vente->getId() ?>"
                                    class="btn-delete"
                                    title="Annuler"
-                                   onclick="return confirm('Annuler la vente #<?= $vente['id'] ?> ? Cette action remettra les produits en stock.');">
+                                   onclick="return confirm('Annuler la vente #<?= $vente->getId() ?> ? Cette action remettra les produits en stock.');">
                                     <i class="fas fa-times"></i>
                                 </a>
                                 <?php endif; ?>

@@ -1,7 +1,6 @@
 <?php
 // backend/edit_categorie.php
 session_start();
-require_once 'config/Database.php';
 require_once 'models/CategorieModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
@@ -10,11 +9,8 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 }
 
 $userName = $_SESSION['user']['name'];
-
-// Initialiser le modèle
 $categorieModel = new CategorieModel();
 
-// Récupérer l'ID de la catégorie à modifier
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id <= 0) {
@@ -22,7 +18,6 @@ if ($id <= 0) {
     exit();
 }
 
-// Récupérer la catégorie
 $categorie = $categorieModel->getCategorieById($id);
 
 if (!$categorie) {
@@ -33,7 +28,6 @@ if (!$categorie) {
 $message = '';
 $messageType = '';
 
-// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'] ?? '';
     $description = $_POST['description'] ?? '';
@@ -43,11 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = "Le nom de la catégorie est obligatoire";
         $messageType = 'error';
     } else {
-        if ($categorieModel->updateCategorie($id, $nom, $description, $statut)) {
+        $categorie->setNom($nom)
+            ->setDescription($description)
+            ->setStatut($statut);
+
+        if ($categorieModel->updateCategorie($categorie)) {
             $message = "Catégorie modifiée avec succès !";
             $messageType = 'success';
-            // Recharger la catégorie
-            $categorie = $categorieModel->getCategorieById($id);
         } else {
             $message = "Erreur lors de la modification";
             $messageType = 'error';

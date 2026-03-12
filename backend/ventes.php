@@ -1,9 +1,7 @@
 <?php
 // backend/ventes.php
 session_start();
-require_once 'config/Database.php';
 require_once 'models/VenteModel.php';
-require_once 'models/UserModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -12,15 +10,11 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
 $userName = $_SESSION['user']['name'];
 
-// Initialiser les modèles
 $venteModel = new VenteModel();
-$userModel = new UserModel();
 
-// Gestion des actions
 $message = '';
 $messageType = '';
 
-// Annulation d'une vente
 if (isset($_GET['annuler']) && is_numeric($_GET['annuler'])) {
     $venteId = (int)$_GET['annuler'];
 
@@ -38,7 +32,7 @@ if (isset($_GET['annuler']) && is_numeric($_GET['annuler'])) {
     }
 }
 
-// Récupérer toutes les ventes avec détails
+// Récupérer toutes les ventes avec détails (objets Vente)
 $ventes = $venteModel->getVentesWithDetails();
 
 // Statistiques
@@ -59,13 +53,10 @@ foreach ($stats['par_statut'] as $statut) {
     if ($statut['statut'] === 'annulé') $ventesAnnulees = $statut['count'];
 }
 
+// Données pour le graphique
 $jours = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-$valeurs = [5200, 6800, 4300, 7900, 10200, 8500, 7200];
+$valeurs = [5200, 6800, 4300, 7900, 10200, 8500, 7200]; // À remplacer par des données réelles
 $maxValeur = max($valeurs);
 
-echo "<!-- DEBUG: valeurs = " . print_r($valeurs, true) . " -->";
-echo "<!-- DEBUG: maxValeur = $maxValeur -->";
-
-// Inclure la vue
 include '../frontend/ventes.html';
 ?>

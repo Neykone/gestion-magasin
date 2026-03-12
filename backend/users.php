@@ -1,5 +1,5 @@
 <?php
-// users.php - Version avec base de données
+// backend/users.php
 session_start();
 require_once 'models/UserModel.php';
 
@@ -11,7 +11,6 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 $userName = $_SESSION['user']['name'];
 $userModel = new UserModel();
 
-// Gestion des actions
 $message = '';
 $messageType = '';
 
@@ -19,7 +18,6 @@ $messageType = '';
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $deleteId = (int)$_GET['delete'];
 
-    // Empêcher la suppression de son propre compte
     if ($deleteId === $_SESSION['user']['id']) {
         $message = "Vous ne pouvez pas supprimer votre propre compte !";
         $messageType = 'error';
@@ -34,27 +32,20 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     }
 }
 
-// Ajout d'un utilisateur (simulation pour l'instant)
-if (isset($_POST['add_user'])) {
-    // À implémenter plus tard avec un formulaire
-    $message = "Fonctionnalité d'ajout à venir";
-    $messageType = 'info';
-}
-
-// Récupérer tous les utilisateurs depuis la BDD
+// Récupérer tous les utilisateurs (objets User)
 $users = $userModel->getAllUsers();
 
 // Statistiques
 $totalUsers = count($users);
-$admins = count(array_filter($users, function ($u) {
-    return $u['role'] === 'admin';
-}));
-$vendeurs = count(array_filter($users, function ($u) {
-    return $u['role'] === 'vendeur';
-}));
-$fournisseurs = count(array_filter($users, function ($u) {
-    return $u['role'] === 'fournisseur';
-}));
+$admins = 0;
+$vendeurs = 0;
+$fournisseurs = 0;
+
+foreach ($users as $user) {
+    if ($user->isAdmin()) $admins++;
+    if ($user->isVendeur()) $vendeurs++;
+    if ($user->isFournisseur()) $fournisseurs++;
+}
 
 include '../frontend/users.html';
 ?>

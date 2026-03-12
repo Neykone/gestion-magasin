@@ -100,44 +100,61 @@
                 </tr>
                 </thead>
                 <tbody>
+                <!-- Dans la boucle foreach, remplacer les accès tableau par des méthodes -->
                 <?php foreach ($produitsFournis as $produit):
-                        $stockClass = '';
-                        $statutTexte = 'Normal';
-                        $statutClass = 'badge-success';
+    $stockClass = '';
+    $statutTexte = 'Normal';
+    $statutClass = 'badge-success';
 
-                        if ($produit['stock'] == 0) {
-                            $stockClass = 'out-of-stock';
-                            $statutTexte = 'Rupture';
-                            $statutClass = 'badge-danger';
-                        } elseif ($produit['stock'] <= $produit['seuil_alerte']) {
-                            $stockClass = 'low-stock';
-                            $statutTexte = 'Stock faible';
-                            $statutClass = 'badge-warning';
-                        }
-                    ?>
+    if ($produit->isOutOfStock()) {
+                $stockClass = 'out-of-stock';
+                $statutTexte = 'Rupture';
+                $statutClass = 'badge-danger';
+                } elseif ($produit->isLowStock()) {
+                $stockClass = 'low-stock';
+                $statutTexte = 'Stock faible';
+                $statutClass = 'badge-warning';
+                }
+                ?>
                 <tr class="<?= $stockClass ?>">
                     <td>
-                        <div class="produit-nom"><?= htmlspecialchars($produit['nom']) ?></div>
+                        <div class="produit-nom"><?= htmlspecialchars($produit->getNom()) ?></div>
                     </td>
-                    <td data-categorie="<?= htmlspecialchars($produit['categorie_nom'] ?? 'Non catégorisé') ?>">
-                        <span class="badge badge-info"><?= htmlspecialchars($produit['categorie_nom'] ?? 'Non catégorisé') ?></span>
+                    <td>
+                        <span class="badge badge-info"><?= htmlspecialchars($produit->getCategorieNom() ?? 'Non catégorisé') ?></span>
                     </td>
-                    <td><?= htmlspecialchars($produit['description']) ?></td>
-                    <td><strong><?= number_format($produit['prix_vente'], 2) ?> DH</strong></td>
+                    <td><?= htmlspecialchars($produit->getDescription()) ?></td>
+                    <td><strong><?= number_format($produit->getPrixVente(), 2) ?> DH</strong></td>
                     <td>
                         <div class="stock-indicator">
-                                <span class="badge <?= $statutClass ?>" style="font-size: 14px;">
-                                    <?= $produit['stock'] ?> unités
-                                </span>
+            <span class="badge <?= $statutClass ?>" style="font-size: 14px;">
+                <?= $produit->getStock() ?> unités
+            </span>
                         </div>
                     </td>
-                    <td><?= $produit['seuil_alerte'] ?> unités</td>
+                    <td><?= $produit->getSeuilAlerte() ?> unités</td>
                     <td>
-                            <span class="badge <?= $statutClass ?>">
-                                <?= $statutTexte ?>
-                            </span>
+        <span class="badge <?= $statutClass ?>">
+            <?= $statutTexte ?>
+        </span>
                     </td>
                 </tr>
+                <?php endforeach; ?>
+
+                <!-- Dans le graphique aussi -->
+                <?php foreach ($produitsFournis as $produit):
+    $pourcentage = min(100, ($produit->getStock() / 20) * 100);
+                $couleur = $produit->isLowStock() ? '#ff6b6b' : '#28a745';
+                ?>
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span><?= htmlspecialchars($produit->getNom()) ?></span>
+                        <span><?= $produit->getStock() ?> / 20</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: <?= $pourcentage ?>%; background: <?= $couleur ?>;"></div>
+                    </div>
+                </div>
                 <?php endforeach; ?>
                 </tbody>
             </table>

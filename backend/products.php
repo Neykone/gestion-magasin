@@ -3,8 +3,8 @@
 session_start();
 require_once 'config/Database.php';
 require_once 'models/ProductModel.php';
-require_once 'models/CategorieModel.php';  // À créer
-require_once 'models/FournisseurModel.php'; // À créer
+require_once 'models/CategorieModel.php';
+require_once 'models/FournisseurModel.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
@@ -15,8 +15,8 @@ $userName = $_SESSION['user']['name'];
 
 // Initialiser les modèles
 $productModel = new ProductModel();
-$categorieModel = new CategorieModel();   // À créer
-$fournisseurModel = new FournisseurModel(); // À créer
+$categorieModel = new CategorieModel();
+$fournisseurModel = new FournisseurModel();
 
 // Gestion des actions
 $message = '';
@@ -30,17 +30,17 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
         $message = "Produit supprimé avec succès";
         $messageType = 'success';
     } else {
-        $message = "Impossible de supprimer ce produit (peut-être lié à des ventes)";
+        $message = "Impossible de supprimer ce produit (lié à des ventes)";
         $messageType = 'error';
     }
 }
 
-// Récupérer tous les produits
+// Récupérer tous les produits (objets Product)
 $products = $productModel->getAllProducts();
 
-// Récupérer les catégories et fournisseurs pour les filtres (optionnel)
-$categories = $categorieModel->getAllCategories();
-$fournisseurs = $fournisseurModel->getAllFournisseurs();
+// Récupérer les catégories et fournisseurs pour les filtres
+$categories = $categorieModel->getAllCategories(); // À adapter plus tard
+$fournisseurs = $fournisseurModel->getAllFournisseurs(); // À adapter plus tard
 
 // Statistiques
 $totalProduits = count($products);
@@ -49,14 +49,12 @@ $valeurStock = 0;
 $produitsAlerte = 0;
 
 foreach ($products as $product) {
-    $stockTotal += $product['stock'];
-    $valeurStock += $product['prix_achat'] * $product['stock'];
-    if ($product['stock'] <= $product['seuil_alerte']) {
+    $stockTotal += $product->getStock();
+    $valeurStock += $product->getPrixAchat() * $product->getStock();
+    if ($product->isLowStock()) {
         $produitsAlerte++;
     }
 }
-$pageTitle = "Gestion des Produits";
 
-// Inclure la vue
 include '../frontend/products.html';
 ?>

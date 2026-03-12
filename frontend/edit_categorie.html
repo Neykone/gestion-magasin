@@ -160,40 +160,21 @@
                     <div class="form-group">
                         <label for="nom">Nom de la catégorie *</label>
                         <input type="text" id="nom" name="nom" required
-                               value="<?= htmlspecialchars($categorie['nom']) ?>"
-                               placeholder="Ex: Électronique">
-                    </div>
+                               value="<?= htmlspecialchars($categorie->getNom()) ?>">
 
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" rows="4"
-                                  placeholder="Description de la catégorie..."><?= htmlspecialchars($categorie['description'] ?? '') ?></textarea>
-                    </div>
+                        <textarea id="description" name="description" rows="4"><?= htmlspecialchars($categorie->getDescription() ?? '') ?></textarea>
 
-                    <div class="form-group">
-                        <label for="statut">Statut</label>
                         <select id="statut" name="statut">
-                            <option value="actif" <?= ($categorie['statut'] ?? 'actif') === 'actif' ? 'selected' : '' ?>>Actif</option>
-                            <option value="inactif" <?= ($categorie['statut'] ?? '') === 'inactif' ? 'selected' : '' ?>>Inactif</option>
+                            <option value="actif" <?= $categorie->isActif() ? 'selected' : '' ?>>Actif</option>
+                            <option value="inactif" <?= !$categorie->isActif() ? 'selected' : '' ?>>Inactif</option>
                         </select>
-                    </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn-submit">
-                            <i class="fas fa-save"></i> Mettre à jour
-                        </button>
-                        <a href="../backend/categories.php" class="btn-cancel">
-                            <i class="fas fa-times"></i> Annuler
-                        </a>
-                    </div>
-                </form>
-
-                <?php if (isset($categorie['nb_produits']) && $categorie['nb_produits'] > 0): ?>
-                <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
-                    <i class="fas fa-info-circle" style="color: #1976d2; margin-right: 10px;"></i>
-                    <span>Cette catégorie contient <strong><?= $categorie['nb_produits'] ?></strong> produit(s).</span>
-                </div>
-                <?php endif; ?>
+                        <?php if ($categorie->getNbProduits() > 0): ?>
+                        <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
+                            <i class="fas fa-info-circle" style="color: #1976d2; margin-right: 10px;"></i>
+                            <span>Cette catégorie contient <strong><?= $categorie->getNbProduits() ?></strong> produit(s).</span>
+                        </div>
+                        <?php endif; ?>
             </div>
         </div>
     </main>
